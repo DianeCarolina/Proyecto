@@ -1,0 +1,243 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <body>
+        <ui:composition template="./../../WEB-INF/plantillaAdmin.xhtml">
+            <ui:define name="content">
+                <h:form id="frmCa">
+                    <h:column>
+                        <p:commandButton value="NUEVO" onclick="PF('dlgCa').show()" />
+                    </h:column>
+                    <p:separator/>
+                    <p:panel header="CARRERA">
+                        <p:dataTable id="idCarrera" value="#{carreraBean.recuperarTodos()}" var="carreras" paginator="true" rows="5"
+                                     rowsPerPageTemplate="5,10,15,50" >
+                            <p:column headerText="FACULTAD" >
+                                <h:outputText value="#{carreras.idFacultad.nomFacultad}"/>
+                            </p:column>
+                            <p:column headerText="NOMBRE CARRERA" filterBy="#{carreras.nomCarrera}" >
+                                <h:outputText value="#{carreras.nomCarrera}"/>
+                            </p:column>
+                            <p:column headerText="MODALIDAD" >
+                                <h:outputText value="#{carreras.modalidad}"/>
+                            </p:column>
+                            <p:column headerText="DURACIÓN" >
+                                <h:outputText value="#{carreras.duracionCarrera}"/>
+                            </p:column>
+                            <p:column headerText="TÍTULO OTORGADO" filterBy="#{carreras.tituloOtorga}" >
+                                <h:outputText value="#{carreras.tituloOtorga}"/>
+                            </p:column>
+                            <p:column headerText="NIVEL" filterBy="#{carreras.nivel}">
+                                <h:outputText value="#{carreras.nivel}"/>
+                            </p:column>
+                            <p:column headerText="ACCIONES" >
+                                <p:commandButton  action="#{carreraBean.encontrar(carreras.idCarrera)}" update=":carreraDetail" oncomplete="PF('carreraDialog').show()" icon="ui-icon-search" title="VISTA"/>
+                                <p:commandButton  action="#{carreraBean.encontrar(carreras.idCarrera)}" update=":carreraDetail1" oncomplete="PF('carreraDialog1').show()" icon="ui-icon-pencil" title="ACTUALIZAR"/>
+                                <p:commandButton actionListener="#{carreraBean.eliminarCarrera(carreras)}" update=":frmCa:idCarrera" icon="ui-icon-circle-close">
+                                    <p:confirm header="ADVERTENCIA" message="¿ARE YOU SURE?" icon="ui-icon-alert" />
+                                    <p:growl id="message"/>
+                                </p:commandButton>
+                            </p:column>
+                        </p:dataTable> 
+                    </p:panel>
+                </h:form>
+                <p:dialog header="DATOS DE LA CARRERA" widgetVar="dlgCa" modal="true" showEffect="fade" resizable="false" closable="false">
+                    <h:form>
+                        <p:outputPanel id="datosItemDetail" style="text-align:center;">
+                            <p:panelGrid id="pgCarrera" columns="4"  >
+                                <p:outputLabel value="NOMBRE UNIVERSIDAD:" for="txtUniname"/>
+                                <h:panelGroup>
+                                    <p:message for="txtUniname"/>
+                                    <p:selectOneMenu id="txtUniname" value="#{carreraBean.idUniversidad}"
+                                                     required="true" requiredMessage="NOMBRE UNIVERSIDAD ES UN CAMPO REQUERIDO">
+                                        <f:selectItem itemLabel="SELECCIONE UNO" itemValue=" " />
+                                        <f:selectItems value="#{carreraBean.itemsUniversidad}" />
+                                        <p:ajax event="change" listener="#{carreraBean.getFacultades}" update="idFacultad"></p:ajax>
+                                    </p:selectOneMenu>
+                                </h:panelGroup>
+                                <p:outputLabel value="FACULTAD:" for="idFacultad"/>
+                                <h:panelGroup>
+                                    <p:message for="idFacultad"/>
+                                    <p:selectOneMenu id="idFacultad" value="#{carreraBean.idFacultad}" disabled="#{carreraBean.estadoComboBox}"
+                                                     required="true" requiredMessage="FACULTAD ES UN CAMPO REQUERIDO">
+                                        <f:selectItem itemLabel="SELECCIONE UNO" itemValue=" "  />
+                                        <f:selectItems value="#{carreraBean.itemsFacultad}"/>
+                                    </p:selectOneMenu>
+                                </h:panelGroup>
+                                <p:outputLabel value="NOMBRE DE CARRERA:" for="txtCaname"/>
+                                <p:inputText id="txtCaname" value="#{carreraBean.nuevaCarrera.nomCarrera}"
+                                             required="true" requiredMessage="NOMBRE DE CARRERA ES UN CAMPO REQUERIDO"
+                                             onkeypress="return soloLetras(event)"
+                                             onblur="cambiarMayuscula(this, 'null');">
+                                    <p:message for="txtCaname"/>
+                                </p:inputText>
+                                <p:outputLabel value="NIVEL:" for="nivel"/>
+                                <h:panelGroup>
+                                    <p:message for="nivel" />
+                                    <p:selectOneMenu id="nivel" value="#{carreraBean.nuevaCarrera.nivel}" 
+                                                     required="true" requiredMessage="NIVEL ES UN CAMPO REQUERIDO">
+                                        <f:selectItem itemLabel="SELECIONE UNO" itemValue="" />
+                                        <f:selectItems value="#{carreraBean.nivel}" />
+                                    </p:selectOneMenu>
+                                </h:panelGroup>
+                                <p:outputLabel value="MODALIDAD:" for="modalidad" />
+                                <h:panelGroup>
+                                    <p:message for="modalidad"/>
+                                    <p:selectOneMenu id="modalidad" value="#{carreraBean.nuevaCarrera.modalidad}" 
+                                                     required="true" requiredMessage="MODALIDAD ES UN CAMPO REQUERIDO">
+                                        <f:selectItem itemLabel="SELECIONE UNO" itemValue=""/>
+                                        <f:selectItems value="#{carreraBean.modalidad}" />
+                                    </p:selectOneMenu>
+                                </h:panelGroup>
+                                <p:outputLabel value="TÍTULO OTORGA:" for="txttiort"/>
+                                <p:inputText id="txttiort" value="#{carreraBean.nuevaCarrera.tituloOtorga}"
+                                             onkeypress="return soloLetras(event)" onblur="cambiarMayuscula(this, 'null');"
+                                             required="true" requiredMessage="TÍTULO OTORGA ES UN CAMPO REQUERIDO">
+                                    <p:message for="txttiort"/>
+                                </p:inputText>
+                                <p:outputLabel value="DURACIÓN DE LA CARRERA:"/>
+                                <p:inputText value="#{carreraBean.nuevaCarrera.duracionCarrera}" maxlength="2" onkeypress="return soloNumeros(event)"/>
+                                <p:outputLabel value="NOMBRE DIRECTOR:"/>
+                                <p:inputText value="#{carreraBean.nuevaCarrera.nomDirector}"
+                                             onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)"/>
+                                <p:outputLabel value="TELÉFONO:" for="txttelfono"/>
+                                <p:inputMask  id="txttelfono" value="#{carreraBean.nuevaCarrera.telefono}" mask="(99) 9999-999" />
+                                <p:outputLabel value="NÚMERO DE REGISTRO ORGANO COLEGIADO:"/>
+                                <p:inputText value="#{carreraBean.nuevaCarrera.numRegOrganoColegiado}" onblur="cambiarMayuscula(this, 'null');"/>
+                                <p:outputLabel value="FECHA ORGANO DE COLEGIADO:"/>
+                                <p:calendar showOn="button" id="orgCole" 
+                                            yearRange="1900:2100" value="#{carreraBean.nuevaCarrera.fechaOrganoColegiado}" 
+                                            locale="de" navigator="true" pattern="dd-MM-yyyy" title="EJEMPLO: dd-MM-yyyy"/>
+                                <p:outputLabel value="NÚMERO DE REGISTRO DE CONESUP:"/>
+                                <p:inputText value="#{carreraBean.nuevaCarrera.numRegConesup}" onblur="cambiarMayuscula(this, 'null');"/>
+                                <p:outputLabel value="CÓDIGO SUBÁREA ESPECÍFICA:"/>
+                                <p:inputText value="#{carreraBean.nuevaCarrera.codSubareaEspecifica}" onblur="cambiarMayuscula(this, 'null')"/>
+                            </p:panelGrid>
+                            <p:separator/>
+                            <p:commandButton value="AGREGAR" icon="ui-icon-disk" update="pgCarrera :frmCa:idCarrera" actionListener="#{carreraBean.ingresoNuevaCarrera}" />
+                            <p:commandButton value="CERRAR" process="@this" update="pgCarrera" icon="ui-icon-circle-close" oncomplete="PF('dlgCa').hide()" 
+                                             actionListener="#{carreraBean.cerrar()}" >
+                                <p:resetInput target="pgCarrera"/>
+                            </p:commandButton> 
+                        </p:outputPanel>
+                    </h:form>
+                </p:dialog>
+                <p:dialog id="carreraDetail" header="INFORMACIÓN CARRERA" widgetVar="carreraDialog" modal="true" showEffect="fade" hideEffect="fade" resizable="false">
+                    <h:form>
+                        <p:outputPanel  style="text-align:center;">
+                            <p:panelGrid  columns="2" rendered="#{not empty carreraBean.carreratemp}" columnClasses="label,value">
+                                <p:outputLabel value="FACULTAD:"/>
+                                <p:outputLabel value="#{carreraBean.carreratemp.idFacultad.nomFacultad}"/>
+                                <p:outputLabel value="NOMBRE CARRERA:"/>
+                                <p:outputLabel value="#{carreraBean.carreratemp.nomCarrera}"/>
+                                <p:outputLabel value="MODALIDAD:"/>
+                                <p:outputLabel value="#{carreraBean.carreratemp.modalidad}"/>
+                                <p:outputLabel value="DURACIÓN:"/>
+                                <p:outputLabel value="#{carreraBean.carreratemp.duracionCarrera}"/>
+                                <p:outputLabel value="TÍTULO OTORGADO:"/>
+                                <p:outputLabel value="#{carreraBean.carreratemp.tituloOtorga}"/>
+                                <p:outputLabel value="NIVEL"/>
+                                <p:outputLabel value="#{carreraBean.carreratemp.nivel}"/>
+                                <p:outputLabel value="NOMBRE DEL DIRECTOR:"/>
+                                <p:outputLabel value="#{carreraBean.carreratemp.nomDirector}"/>
+                                <p:outputLabel value="TELÉFONO:"/>
+                                <p:outputLabel value="#{carreraBean.carreratemp.telefono}"/>
+                                <p:outputLabel value="CÓDIGO SUBÁREA ESPECÍFICA:"/>
+                                <p:outputLabel value="#{carreraBean.carreratemp.codSubareaEspecifica}"/>
+                                <p:outputLabel value="NÚMERO REGISTRO ORGANO COLEGIADO:"/>
+                                <p:outputLabel value="#{carreraBean.carreratemp.numRegOrganoColegiado}"/>
+                                <p:outputLabel value="FECHA ORGANO COLEGIADO:"/>
+                                <p:outputLabel value="#{carreraBean.carreratemp.fechaOrganoColegiado}">
+                                    <f:convertDateTime pattern="dd-MM-yyyy"/>
+                                </p:outputLabel>
+                                <p:outputLabel value="NÚMERO DE REGISTRO CONESUP:"/>
+                                <p:outputLabel value="#{carreraBean.carreratemp.numRegConesup}" />
+                            </p:panelGrid>
+                        </p:outputPanel>
+                    </h:form>
+                </p:dialog>
+                <p:dialog id="carreraDetail1" header="DATOS DE LA CARRERA" widgetVar="carreraDialog1" modal="true" showEffect="fade" hideEffect="fade" resizable="false" closable="false">
+                    <h:form>
+                        <p:outputPanel  style="text-align:center;">
+                            <p:panelGrid id="pnlCarrera" columns="4" rendered="#{not empty carreraBean.carreratemp}"  columnClasses="label,value">
+                                <p:outputLabel value="FACULTAD:"/>
+                                <p:outputLabel value="#{carreraBean.carreratemp.idFacultad.nomFacultad}"/>
+                                <p:outputLabel value="NOMBRE CARRERA:" for="txtCaname"/>
+                                <p:inputText id="txtCaname" value="#{carreraBean.carreratemp.nomCarrera}"
+                                             required="true" requiredMessage="NOMBRE DE CARRERA ES UN CAMPO REQUERIDO"
+                                             onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)">
+                                    <p:message for="txtCaname"/>
+                                </p:inputText>
+
+                                <p:outputLabel value="NIVEL" for="nivel"/>
+                                <h:panelGroup>
+                                    <p:message for="nivel"/>
+                                    <p:selectOneMenu id="nivel" value="#{carreraBean.carreratemp.nivel}"
+                                                     required="true" requiredMessage="NIVEL ES UN CAMPO REQUERIDO">
+                                        <f:selectItem itemLabel="SELECCIONE UNO" itemValue=""/>
+                                        <f:selectItems value="#{carreraBean.nivel}" />
+                                    </p:selectOneMenu>
+                                </h:panelGroup>
+                                <p:outputLabel value="MODALIDAD:" for="modalidad" />
+                                <h:panelGroup>
+                                    <p:message for="modalidad"/>
+                                    <p:selectOneMenu id="modalidad" value="#{carreraBean.carreratemp.modalidad}" 
+                                                     required="true" requiredMessage="MODALIDAD ES UN CAMPO REQUERIDO">
+                                        <f:selectItem itemLabel="SELECIONE UNO" itemValue=""/>
+                                        <f:selectItems value="#{carreraBean.modalidad}" />
+                                    </p:selectOneMenu>
+                                </h:panelGroup>
+                                <p:outputLabel value="TÍTULO OTORGADO:" for="txttiort"/>
+                                <p:inputText id="txttiort" value="#{carreraBean.carreratemp.tituloOtorga}" 
+                                             onkeypress="return soloLetras(event)" required="true" 
+                                             requiredMessage="TÍTULO OTORGADO ES UN CAMPO REQUERIDO"
+                                             onblur="cambiarMayuscula(this, 'null');"/>
+                                <p:outputLabel value="DURACIÓN:"/>
+                                <p:inputText value="#{carreraBean.carreratemp.duracionCarrera}" maxlength="2" 
+                                             onkeypress="return soloNumeros(event)"/>
+                                <p:outputLabel value="NOMBRE DEL DIRECTOR:"/>
+                                <p:inputText value="#{carreraBean.carreratemp.nomDirector}"
+                                             onkeypress="return soloLetras(event)"
+                                             onblur="cambiarMayuscula(this, 'null');"/>
+                                <p:outputLabel value="TELÉFONO:" for="tel"/>
+                                <p:inputMask id="tel" value="#{carreraBean.carreratemp.telefono}" mask="(99) 9999-999"
+                                             />
+                                <p:outputLabel value="NÚMERO REGISTRO ORGANO COLEGIADO:"/>
+                                <p:inputText value="#{carreraBean.carreratemp.numRegOrganoColegiado}"  
+                                             onblur="cambiarMayuscula(this, 'null');"/>
+                                <p:outputLabel value="FECHA ORGANO COLEGIADO:"/>
+                                <p:calendar value="#{carreraBean.carreratemp.fechaOrganoColegiado}" 
+                                            showOn="button" locale="de" navigator="true" yearRange="1800:2100"
+                                            pattern="dd-MM-yyyy" title="EJEMPLO: dd-MM-yyyy"/>
+                                <p:outputLabel value="NÚMERO DE REGISTRO CONESUP:"/>
+                                <p:inputText value="#{carreraBean.carreratemp.numRegConesup}"
+                                             onblur="cambiarMayuscula(this, 'null');"/>
+                                <p:outputLabel value="CÓDIGO SUBÁREA ESPECÍFICA:"/>
+                                <p:inputText value="#{carreraBean.carreratemp.codSubareaEspecifica}"
+                                             onblur="cambiarMayuscula(this, 'null');"/>
+                            </p:panelGrid>
+                            <p:separator />
+                            <p:commandButton value="ACTUALIZAR" icon="ui-icon-pencil" actionListener="#{carreraBean.editCarrera}" update="pnlCarrera :frmCa:idCarrera"  />
+                            <p:commandButton value="CERRAR" process="@this" update="pnlCarrera" icon="ui-icon-close" oncomplete="PF('carreraDialog1').hide()" 
+                                             actionListener="#{carreraBean.cerrar()}" >
+                                <p:resetInput target="pnlCarrera"/>
+                            </p:commandButton> 
+                        </p:outputPanel>
+                    </h:form>
+                </p:dialog>
+                <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                    <h:form>
+                        <p:commandButton value="SI" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                        <p:commandButton value="NO" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+                    </h:form>
+                </p:confirmDialog>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>

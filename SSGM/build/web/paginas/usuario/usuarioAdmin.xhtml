@@ -1,0 +1,221 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <body>
+        <ui:composition template="./../../WEB-INF/plantillaAdmin.xhtml">
+            <ui:define name="content">
+
+                <h:form>
+                    <p:commandButton value="NUEVO" onclick="PF('dlgUsuario').show()" />
+                </h:form>
+
+                <p:separator/>
+
+                <h:form id="frmUs">
+                    <p:panel  header="USUARIO">
+                        <p:dataTable  id="tablaUsuario" value="#{usuarioBean.recuperarUsuarioTodos()}" var="user" paginator="true" rows="5"
+                                      rowsPerPageTemplate="5,10,15,50">
+                            <p:column headerText="PERFIL">
+                                <h:outputText value="#{user.idPerfil.tipoPerfil}" />
+                            </p:column>
+                            <p:column headerText="NOMBRE DEL USUARIO" filterBy="#{user.nombreUsuario}">
+                                <h:outputText value="#{user.nombreUsuario}" />
+                            </p:column>
+                            <p:column headerText="APELLIDO DEL USUARIO" filterBy="#{user.apellidoUsuario}">
+                                <h:outputText value="#{user.apellidoUsuario}" />
+                            </p:column>
+                            <p:column headerText="NOMBRE USER" filterBy="#{user.nomUser}">
+                                <h:outputText value="#{user.nomUser}" />
+                            </p:column>
+                            <p:column headerText="FECHA DE REGISTRO">
+                                <h:outputText value="#{user.fechaRegistro}"  >
+                                    <f:convertDateTime pattern="yyyy-MM-dd"/>
+                                </h:outputText>
+                            </p:column> 
+                            <p:column headerText="ESTADO" >
+                                <h:outputText value="#{user.estado}" />
+                            </p:column>
+                            <p:column headerText="ACCIONES" style="width:100px;text-align: center">
+                                <p:commandButton actionListener="#{usuarioBean.encontrar(user.idUsuario)}" update=":userDetail" oncomplete="PF('userDialog').show()" icon="ui-icon-search" title="VISTA"/>
+                                <p:commandButton actionListener="#{usuarioBean.encontrar(user.idUsuario)}" update=":userDetail1" oncomplete="PF('userDialog1').show()" icon="ui-icon-pencil" title="ACTUALIZAR"/>
+                                <p:commandButton actionListener="#{usuarioBean.eliminarUsuario(user)}" update=":frmUs:tablaUsuario" icon="ui-icon-circle-close" title="ELIMINAR">
+                                    <p:confirm header="Confirmation" message="Are you sure?" icon="ui-icon-alert" />
+                                    <p:growl id="message"/>
+                                </p:commandButton>
+                            </p:column>
+                        </p:dataTable>
+                    </p:panel>
+                </h:form>
+
+
+                <p:dialog  id="userDetail1" header="DATOS USUARIO" widgetVar="userDialog1" 
+                           modal="true" showEffect="fade" hideEffect="fade" resizable="false" closable="false">
+                    <h:form>
+                        <p:outputPanel  style="text-align:center;">
+                            <p:panelGrid id="pnlUsuario" columns="2" rendered="#{not empty usuarioBean.usuariotemp}" columnClasses="label,value">
+                                <p:outputLabel value="PERFIL DEL USUARIO:" for="perfil"/>
+                                <h:panelGroup>
+                                    <p:selectOneMenu id="perfil" value="#{usuarioBean.idPerfil}"
+                                                     required="true" requiredMessage="PERFIL DEL USUARIO ES UN CAMPO REQUERIDO">
+                                        <f:selectItems itemLabel="SELECCIONE UNO" itemValue="" />
+                                        <f:selectItems value="#{usuarioBean.itemsPerfil}" />
+                                        <p:message for="perfil"/>
+                                    </p:selectOneMenu>
+                                </h:panelGroup>
+                                <p:outputLabel value="NOMBRES DEL USUARIO:" for="txtname"/>
+                                <p:inputText id="txtname" value="#{usuarioBean.usuariotemp.nombreUsuario}"
+                                             required="true" requiredMessage="NOMBRES DEL USUARIO ES UN CAMPO REQUERIDO"
+                                             onkeypress="return soloLetras(event)" onblur="cambiarMayuscula(this, 'null');">
+                                    <p:message for="txtname"/>
+                                </p:inputText>
+                                <p:outputLabel value="APELLIDOS DEL USUARIO:" for="txtap"/>
+                                <p:inputText id="txtap" value="#{usuarioBean.usuariotemp.apellidoUsuario}"
+                                             onkeypress="return soloLetras(event)" onblur="cambiarMayuscula(this, 'null');"
+                                             required="true" requiredMessage="APELLIDOS DEL USUARIO ES UN CAMPO REQUERIDO">
+                                    <p:message for="txtap"/>
+                                </p:inputText>
+                                <p:outputLabel value="NOMBRE DE USER:" for="txtUser"/>
+                                <p:inputText id="txtUser" value="#{usuarioBean.usuariotemp.nomUser}" 
+                                             required="true" requiredMessage="NOMBRES DEL USER ES UN CAMPO REQUERIDO">
+                                    <p:message for="txtUser"/>
+                                </p:inputText>
+                                <p:outputLabel value="CONTRASEÑA:" for="txtpass"/>
+                                <p:inputText id="txtpass" value="#{usuarioBean.usuariotemp.contrasenia}" 
+                                             required="true" requiredMessage="CONTRASEÑA ES UN CAMPO REQUERIDO">
+                                    <p:message for="txtpass"/>
+                                </p:inputText>
+                                <p:outputLabel value="CORREO ELECTRÓNICO:" for="txtemail"/>
+                                <p:inputText id="txtemail" value="#{usuarioBean.usuariotemp.correo}" 
+                                             size="50" title="EJMEPLO: kaaf030191@gmail.com" >
+                                    <f:validator validatorId="validatorEmail"/>
+                                    <h:panelGroup>
+                                        <p:tooltip for="txtemail" showEvent="focus" hideEvent="blur"/>
+                                        <p:message for="txtemail"/>
+                                    </h:panelGroup>
+                                </p:inputText>                                
+                                <p:outputLabel value="FECHA DE REGISTRO:"/>
+                                <p:calendar  value="#{usuarioBean.usuariotemp.fechaRegistro}" 
+                                             locale="de" navigator="true" pattern="dd-MM-yyyy"
+                                             title="EJEMPLO: dd-MM-yyyy"/>
+                                <p:outputLabel value="ESTADO:"/>
+                                <p:selectBooleanCheckbox value="#{usuarioBean.usuariotemp.estado}"/> 
+
+                            </p:panelGrid>
+                            <p:separator />
+                            <p:commandButton value="ACTUALIZAR" icon="ui-icon-pencil" actionListener="#{usuarioBean.editarUsuario}" 
+                                             update="pnlUsuario :frmUs:tablaUsuario"/>
+                            <p:commandButton value="CERRAR" process="@this" update="pnlUsuario" icon="ui-icon-close" oncomplete="PF('userDialog1').hide()" 
+                                             actionListener="#{usuarioBean.cerrar()}" >
+                                <p:resetInput target="pnlUsuario"/>
+                            </p:commandButton> 
+                        </p:outputPanel>
+                    </h:form>
+                </p:dialog>
+
+
+                <p:dialog id="userDetail" header="INFORMACIÓN DEL USUARIO" widgetVar="userDialog" 
+                          modal="true" showEffect="fade" hideEffect="fade" resizable="false">
+                    <h:form>
+                        <p:outputPanel  style="text-align:center;">
+                            <p:panelGrid  columns="2" rendered="#{not empty usuarioBean.usuariotemp}" columnClasses="label,value">
+                                <p:outputLabel value="ID USUARIO:"/>
+                                <p:outputLabel value="#{usuarioBean.usuariotemp.idUsuario}" />
+                                <p:outputLabel value="PERFIL:"/>
+                                <p:outputLabel value="#{usuarioBean.usuariotemp.idPerfil.tipoPerfil}" />
+                                <p:outputLabel value="NOMBRE DEL USUARIO:"/>
+                                <p:outputLabel value="#{usuarioBean.usuariotemp.nombreUsuario}" />
+                                <p:outputLabel value="APELLIDO DEL USUARIO:"/>
+                                <p:outputLabel value="#{usuarioBean.usuariotemp.apellidoUsuario}" />
+                                <p:outputLabel value="NOMBRE USER:"/>
+                                <p:outputLabel value="#{usuarioBean.usuariotemp.nomUser}" />
+                                <p:outputLabel value="PASSWORD:"/>
+                                <p:outputLabel value="#{usuarioBean.usuariotemp.contrasenia}" />
+                                <p:outputLabel value="CORREO ELECTRÓNICO:" />
+                                <p:outputLabel  value="#{usuarioBean.usuariotemp.correo}" />
+                                <p:outputLabel value="FECHA DE REGISTRO:"/>
+                                <p:outputLabel value="#{usuarioBean.usuariotemp.fechaRegistro}" >
+                                    <f:convertDateTime pattern="dd-MM-yyyy"/>
+                                </p:outputLabel> 
+                                <p:outputLabel value="ESTADO"/>
+                                <p:outputLabel value="#{usuarioBean.usuariotemp.estado}" />
+                            </p:panelGrid>
+                        </p:outputPanel>
+                    </h:form>
+                </p:dialog>
+
+
+                <p:dialog header="DATOS DEL USUARIO" widgetVar="dlgUsuario" modal="true" showEffect="fade" resizable="false" closable="false">
+                    <h:form>
+                        <p:outputPanel id="datosItemDetail" style="text-align:center;">
+                            <p:panelGrid id="pnlUser" columns="2">
+                                <p:outputLabel value="PERFIL DEL USUARIO:" for="perfil"/>
+                                <h:panelGroup>
+                                    <p:message for="perfil"/>
+                                    <p:selectOneMenu id="perfil" value="#{usuarioBean.idPerfil}" 
+                                                     required="true" requiredMessage="PERFIL DEL USUARIO ES UN CAMPO REQUERIDO">
+                                        <f:selectItem itemLabel="SELECIONE UNO" itemValue="" />
+                                        <f:selectItems value="#{usuarioBean.itemsPerfil}" />
+                                    </p:selectOneMenu>  
+                                </h:panelGroup>
+                                <p:outputLabel value="NOMBRES DEL USUARIO:" for="txtname"/>
+                                <p:inputText id="txtname" value="#{usuarioBean.nuevoUsuario.nombreUsuario}"
+                                             required="true" requiredMessage="NOMBRES DEL USUARIO ES UN CAMPO REQUERIDO"
+                                             onblur="cambiarMayuscula(this, 'null')" onkeypress="return soloLetras(event)">
+                                    <p:message for="txtname"/>
+                                </p:inputText>
+                                <p:outputLabel value="APELLIDOS DEL USUARIO:" for="txtap"/>
+                                <p:inputText id="txtap" value="#{usuarioBean.nuevoUsuario.apellidoUsuario}"
+                                             required="true" requiredMessage="APELLIDOS DEL USUARIO ES UN CAMPO REQUERIDO"
+                                             onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)">
+                                    <p:message for="txtap"/>
+                                </p:inputText>
+                                <p:outputLabel value="NOMBRE DE USER :" for="txtUser"/>
+                                <p:inputText id="txtUser" value="#{usuarioBean.nuevoUsuario.nomUser}" 
+                                             required="true" requiredMessage="NOMBRE DE USER ES UN CAMPO REQUERIDO">
+                                    <p:message for="txtUser"/>
+                                </p:inputText>
+                                <p:outputLabel value="CONTRASEÑA:" for="txtpass"/>
+                                <p:inputText id="txtpass" value="#{usuarioBean.nuevoUsuario.contrasenia}" 
+                                             required="true" requiredMessage="CONTRASEÑA ES UN CAMPO REQUERIDO" >
+                                    <p:message for="txtpass"/>
+                                </p:inputText>
+                                <p:outputLabel value="CORREO ELECTRÓNICO:" for="txtemail"/>
+                                <p:inputText id="txtemail" value="#{usuarioBean.nuevoUsuario.correo}" 
+                                             size="50" title="EJMEPLO: kaaf030191@gmail.com" >
+                                    <f:validator validatorId="validatorEmail"/>
+                                    <h:panelGroup>
+                                        <p:tooltip for="txtemail" showEvent="focus" hideEvent="blur"/>
+                                        <p:message for="txtemail"/>
+                                    </h:panelGroup>
+                                </p:inputText>
+                                <p:outputLabel value="FECHA DE REGISTRO:"/>
+                                <p:calendar id="idFechaRegistro" value="#{usuarioBean.fechaRegistro}" 
+                                            locale="de" navigator="true" pattern="dd-MM-yyyy" />
+                                <p:outputLabel value="ESTADO:"/>
+                                <p:selectBooleanCheckbox value="#{usuarioBean.nuevoUsuario.estado}"/>
+                            </p:panelGrid>
+                            <p:separator />
+                            <p:commandButton value="AGREGAR" icon="ui-icon-disk" update="pnlUser :frmUs:tablaUsuario" actionListener="#{usuarioBean.ingresoNuevoUsuario}"/>
+                            <p:commandButton value="CERRAR" process="@this" update="pnlUser" icon="ui-icon-circle-close" oncomplete="PF('dlgUsuario').hide()" 
+                                             actionListener="#{usuarioBean.cerrar()}" >
+                                <p:resetInput target="pnlUser"/>
+                            </p:commandButton>
+                        </p:outputPanel>
+                    </h:form>
+                </p:dialog>
+
+
+                <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                    <h:form>
+                        <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                        <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+                    </h:form>
+                </p:confirmDialog>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>

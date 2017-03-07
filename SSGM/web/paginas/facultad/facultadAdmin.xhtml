@@ -1,0 +1,160 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <body>
+        <ui:composition template="./../../WEB-INF/plantillaAdmin.xhtml">
+            <ui:define name="content">
+                <h:form>
+                    <p:commandButton value="NUEVO" onclick="PF('dlgFa').show()"  />
+                </h:form>
+                <p:separator/>
+                <p:panel header="FACULTAD">
+                    <h:form id="frmFa">
+                        <p:dataTable id="idFacultad" value="#{facultadBean.recuperarFacultadTodos()}"  var="facultades" paginator="true" rows="5"
+                                     rowsPerPageTemplate="5,10,15,50">
+                            <p:column headerText="UNIVERSIDAD"  >
+                                <h:outputLabel value="#{facultades.idUniversidad.nomUniversidad}" />
+                            </p:column>
+                            <p:column headerText="NOMBRE" filterBy="#{facultades.nomFacultad}">
+                                <h:outputLabel value="#{facultades.nomFacultad}"/>
+                            </p:column>
+                            <p:column headerText="TELÉFONO" >
+                                <h:outputLabel value="#{facultades.telefono}"/>
+                            </p:column>
+                            <p:column headerText="DIRECCIÓN" >
+                                <h:outputText value="#{facultades.direccionFacultad}"/>
+                            </p:column>
+                            <p:column headerText="NOMBRE DEL DIRECTOR" >
+                                <h:outputText value="#{facultades.directorFacultad}"/>
+                            </p:column>
+                            <p:column headerText="ACCIONES" >
+                                <p:commandButton  action="#{facultadBean.encontrar(facultades.idFacultad)}" update=":facuDetail1" oncomplete="PF('facuDialog1').show()" icon="ui-icon-search" title="VISTA"/> 
+                                <p:commandButton action="#{facultadBean.encontrar(facultades.idFacultad)}" update=":facuDetail" oncomplete="PF('facuDialog').show()" icon="ui-icon-pencil" title="ACTUALIZAR"/>
+                                <p:commandButton actionListener="#{facultadBean.eliminarFacultad(facultades)}"  update=":frmFa:idFacultad" icon="ui-icon-circle-close">
+                                    <p:confirm header="ADVERTENCIA" message="¿ARE YOU SURE?" icon="ui-icon-alert" />
+                                    <p:growl id="message"/>
+                                </p:commandButton>
+                            </p:column>
+                        </p:dataTable>
+                    </h:form>
+                </p:panel>
+                <p:dialog id="facuDetail" header="DATOS FACULTAD" widgetVar="facuDialog" modal="true" showEffect="fade" hideEffect="fade" resizable="false" closable="false">
+                    <h:form>
+                        <p:outputPanel  style="text-align:center;">
+                            <p:panelGrid id="pnlgFacultad" columns="2" rendered="#{not empty facultadBean.facultadtemp}" columnClasses="label,value">
+                                <p:outputLabel value="NOMBRE UNIVERSIDAD:" for="txtUni"/>
+                                <h:panelGroup>
+                                    <p:message for="txtUni"/>
+                                    <p:selectOneMenu id="txtUni" value="#{facultadBean.idUniversidad}"
+                                                     required="true" requiredMessage="NOMBRE UNIVERSIDAD ES UN CAMPO REQUERIDO">
+                                        <f:selectItem itemLabel="SELECCIONE UNO" itemValue=" " />
+                                        <f:selectItems value="#{facultadBean.itemsUniversidad}" />
+                                    </p:selectOneMenu>
+                                </h:panelGroup>
+                                <p:outputLabel value="NOMBRE DE LA FACULTAD:" for="txtFaname"/>
+                                <p:inputText id="txtFaname" value="#{facultadBean.facultadtemp.nomFacultad}" 
+                                             required="true" requiredMessage="NOMBRE DE LA FACULTAD ES UN CAMPO REQUERIDO"
+                                             onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)">
+                                    <p:message for="txtFaname"/>
+                                </p:inputText>
+                                <p:outputLabel value=" TELÉFONO: " for="telefono"/>
+                                <p:inputMask id="telefono" value="#{facultadBean.facultadtemp.telefono}"
+                                             mask="(99) 9999-999"/>
+                                <p:outputLabel value="DIRECCIÓN"/>
+                                <p:inputText value="#{facultadBean.facultadtemp.direccionFacultad}"
+                                             onblur="cambiarMayuscula(this, 'null');"/>
+                                <p:outputLabel value="NOMBRE DEL DIRECTOR:" for="txtDirec"/>
+                                <p:inputText id="txtDirec" value="#{facultadBean.facultadtemp.directorFacultad}"
+                                             required="true" requiredMessage="NOMBRE DEL DIRECTOR ES UN CAMPO REQUERIDO"
+                                             onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)">
+                                    <p:message for="txtDirec"/>
+                                </p:inputText>
+                            </p:panelGrid>
+                            <p:separator />
+                            <p:commandButton value="ACTUALIZAR" icon="ui-icon-pencil" actionListener="#{facultadBean.editarFacultad}" update="pnlgFacultad :frmFa:idFacultad" />
+                            <p:commandButton value="CERRAR" process="@this" update="pnlgFacultad" icon="ui-icon-close" oncomplete="PF('facuDialog').hide()" 
+                                             actionListener="#{facultadBean.cerrar()}" >
+                                <p:resetInput target="pnlgFacultad"/>
+                            </p:commandButton> 
+                        </p:outputPanel>
+                    </h:form>
+                </p:dialog>  
+
+                <p:dialog id="facuDetail1" header="DATOS FACULTAD" widgetVar="facuDialog1" modal="true" showEffect="fade" hideEffect="fade" resizable="false">
+                    <h:form>
+                        <p:outputPanel  style="text-align:center;">
+                            <p:panelGrid  columns="2" rendered="#{not empty facultadBean.facultadtemp}" columnClasses="label,value">
+                                <p:outputLabel value="ID FACULTAD"  />
+                                <p:outputLabel  value="#{facultadBean.facultadtemp.idFacultad}" />
+                                <p:outputLabel value="NOMBRE DE LA FACULTAD:"/>
+                                <p:outputLabel  value="#{facultadBean.facultadtemp.nomFacultad}" />
+                                <p:outputLabel value=" TELÉFONO: "/>
+                                <p:outputLabel value="#{facultadBean.facultadtemp.telefono}"/>
+                                <p:outputLabel value="DIRECCIÓN"/>
+                                <p:outputLabel value="#{facultadBean.facultadtemp.direccionFacultad}"/>
+                                <p:outputLabel value="NOMBRE DEL DIRECTOR:"/>
+                                <p:outputLabel  value="#{facultadBean.facultadtemp.directorFacultad}"/>
+                            </p:panelGrid>
+                        </p:outputPanel>
+                    </h:form>
+                </p:dialog>
+
+                <p:dialog header="INGRESO DE DATOS DE LA FACULTAD" widgetVar="dlgFa" closable="false" >
+                    <h:form>
+                        <p:outputPanel id="userDetail" style="text-align:center;">
+                            <p:panelGrid id="dgFa" columns="2"  >
+                                <p:outputLabel value="NOMBRE UNIVERSIDAD:" for="txtUni"/>
+                                <h:panelGroup>
+                                    <p:message for="txtUni"/>
+                                    <p:selectOneMenu id="txtUni" value="#{facultadBean.idUniversidad}"
+                                                     required="true" requiredMessage="NOMBRE UNIVERSIDAD ES UN CAMPO REQUERIDO">
+                                        <f:selectItem itemLabel="SELECCIONE UNO" itemValue=" " />
+                                        <f:selectItems value="#{facultadBean.itemsUniversidad}" />
+                                    </p:selectOneMenu>
+                                </h:panelGroup>
+                                <p:outputLabel value="NOMBRE DE LA FACULTAD:" for="txtFaname"/>
+                                <p:inputText id="txtFaname" value="#{facultadBean.nuevaFacultad.nomFacultad}"
+                                             required="true" requiredMessage="NOMBRE DE LA FACULTAD ES UN CAMPO REQUERIDO"
+                                             onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)">
+                                    <p:message for="txtFaname"/>
+                                </p:inputText>
+                                <p:outputLabel value="TELÉFONO:" for="telefono"/>
+                                <p:inputMask mask="(09) 9999-999" id="telefono" value="#{facultadBean.nuevaFacultad.telefono}"/>
+                                <p:outputLabel value="DIRECCIÓN:"/>
+                                <p:inputText value="#{facultadBean.nuevaFacultad.direccionFacultad}" onblur="cambiarMayuscula(this, 'null');"/>
+                                <p:outputLabel value="DIRECTOR:" for="txtDirec"/>
+                                <p:inputText id="txtDirec" value="#{facultadBean.nuevaFacultad.directorFacultad}"
+                                             required="true" requiredMessage="NOMBRE DEL DIRECTOR ES UN CAMPO REQUERIDO"
+                                             onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)">
+                                    <p:message for="txtDirec"/>
+                                </p:inputText>
+                            </p:panelGrid>
+                            <p:separator/>
+                            <p:commandButton value="AGREGAR" update="dgFa :frmFa:idFacultad" icon="ui-icon-disk" 
+                                             actionListener="#{facultadBean.ingresoNuevaFacultad}"> 
+                            </p:commandButton> 
+                            <p:commandButton value="CERRAR" process="@this" update="dgFa" icon="ui-icon-circle-close" oncomplete="PF('dlgFa').hide()" 
+                                             actionListener="#{facultadBean.cerrar()}" >
+                                <p:resetInput target="dgFa"/>
+                            </p:commandButton> 
+                        </p:outputPanel>
+                    </h:form>
+                </p:dialog>
+
+                <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                    <h:form>
+                        <p:commandButton value="SI" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                        <p:commandButton value="NO" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+                    </h:form>
+                </p:confirmDialog>
+
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>

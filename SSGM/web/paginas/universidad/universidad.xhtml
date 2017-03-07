@@ -1,0 +1,208 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+        <ui:composition template="./../../WEB-INF/plantillaAdmin.xhtml">
+            <ui:define name="content">
+                <h:form>
+                    <p:commandButton value="NUEVO" onclick="PF('dlgUni').show()"  />
+                </h:form>
+                <p:separator/>
+                <p:panel header="INSTITUCIÓN DE EDUCACIÓN SUPERIOR">
+                    <h:form id="frmUn">
+                        <p:dataTable  id="idUniversidad" value="#{universidadBean.listUniversidad}" var="universidades" paginator="true" rows="5"
+                                      rowsPerPageTemplate="5,10,15,50">
+                            <p:column headerText="CÓDIGO" >
+                                <h:outputText value="#{universidades.codUniversidad}"/>
+                            </p:column>
+                            <p:column headerText="TIPO UNIVERSIDAD" >
+                                <h:outputText value="#{universidades.tipoUniversidad}"/>
+                            </p:column>
+                            <p:column headerText="NOMBRE" style="width: 300px" filterBy="#{universidades.nomUniversidad}">
+                                <h:outputText value="#{universidades.nomUniversidad}"/>
+                            </p:column>
+                            <p:column headerText="DIRECCIÓN" >
+                                <h:outputText value="#{universidades.direccionUniversidad}"/>
+                            </p:column>
+                            <p:column headerText="NOMBRE AUTORIDAD" >
+                                <h:outputText value="#{universidades.autoridad}"/>
+                            </p:column>
+                            <p:column headerText="OPCIONES" >
+                                <p:commandButton actionListener="#{universidadBean.encontrarUniversidad(universidades.idUniversidad)}" update=":dlgInf" oncomplete="PF('uniDialog').show()" icon="ui-icon-search" title="VISTA"/>
+                                <p:commandButton actionListener="#{universidadBean.encontrarUniversidad(universidades.idUniversidad)}" update=":uniDetail1" oncomplete="PF('uniDialog1').show()" icon="ui-icon-pencil" title="ACTUALIZAR"/>
+                                <p:commandButton actionListener="#{universidadBean.eliminarUniversidad(universidades)}" update=":frmUn:idUniversidad" icon="ui-icon-circle-close">
+                                    <p:confirm header="ADVERTENCIA" message="¿ARE YOU SURE?" icon="ui-icon-alert" />
+                                    <p:growl id="massages"/>
+                                </p:commandButton>
+                            </p:column>
+                        </p:dataTable>
+                    </h:form>
+                    <p:dialog header="DATOS DE LA UNIVERSIDAD" widgetVar="dlgUni" modal="true" showEffect="fade" resizable="false" closable="false">
+                        <h:form>
+                            <p:outputPanel id="datosItemDetail" style="text-align:center;">
+                                <p:panelGrid id="dgUni" columns="2">
+                                    <p:outputLabel value="CÓDIGO:" for="txtcodigo"/>
+                                    <p:inputText id="txtcodigo" value="#{universidadBean.universidad.codUniversidad}" maxlength="4"
+                                                 required="true" requiredMessage="CÓDIGO ES UN CAMPO REQUERIDO" onkeypress="return soloNumeros(event)">
+                                        <p:message for="txtcodigo"/>
+                                    </p:inputText>
+                                    <p:outputLabel value="TIPO DE INSTITUCIÓN:" for="tipoInst"/>
+                                    <h:panelGroup>
+                                        <p:message for="tipoInst"/>
+                                        <p:selectOneMenu id="tipoInst"  required="true"  value="#{universidadBean.universidad.tipoUniversidad}" 
+                                                         requiredMessage="TIPO DE INSTITUCIÓN ES UN CAMPO REQUERIDO" >
+                                            <f:selectItem itemLabel="SELECIONE UNO" itemValue=""  />
+                                            <f:selectItems  value="#{universidadBean.tipoUniversidad}" />
+                                        </p:selectOneMenu>
+                                    </h:panelGroup>
+                                    <p:outputLabel value="NOMBRE DE INSTITUCIÓN:" for="txtUname"/>
+                                    <p:inputText id="txtUname" value="#{universidadBean.universidad.nomUniversidad}"
+                                                 required="true" requiredMessage="NOMBRE DE INSTITUCIÓN ES REQUERIDA"
+                                                 onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)">
+                                        <p:message for="txtUname"/>
+                                    </p:inputText>
+                                    <p:outputLabel value="DIRECCIÓN:"/>
+                                    <p:inputText id="dirUni" value="#{universidadBean.universidad.direccionUniversidad}" onblur="cambiarMayuscula(this, 'null');"/>
+                                    <p:outputLabel  value="TELÉFONO:" for="numeroTelefono"/>
+                                    <p:inputMask id="numeroTelefono" value="#{universidadBean.universidad.telefonoUniversidad}" mask="(99) 9999-999"
+                                                 />
+                                    <p:outputLabel value="SITIO WEB:"/>
+                                    <p:inputText value="#{universidadBean.universidad.sitioWeb}"/>
+                                    <p:outputLabel value="PAIS:" for="txtpais"/>
+                                    <p:inputText id="txtpais" value="#{universidadBean.universidad.pais}"
+                                                 required="true" requiredMessage="PAÍS ES UN CAMPO REQUERIDO"
+                                                 onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)">
+                                        <p:message for="txtpais"/>
+                                    </p:inputText>
+                                    <p:outputLabel value="PROVINCIA:" for="txtprov"/>
+                                    <p:inputText id="txtprov" value="#{universidadBean.universidad.provincia}"
+                                                 required="true" requiredMessage="PROVINCIA ES UN CAMPO REQUERIDO"
+                                                 onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)">
+                                        <p:message for="txtprov"/>
+                                    </p:inputText>
+                                    <p:outputLabel value="CIUDAD:" for="txtciu"/>
+                                    <p:inputText id="txtciu" value="#{universidadBean.universidad.ciudad}"
+                                                 required="true" requiredMessage="CIUDAD ES UN CAMPO REQUERIDO"
+                                                 onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)">
+                                        <p:message for="txtciu"/>
+                                    </p:inputText>
+                                    <p:outputLabel value="AUTORIDAD:"/>
+                                    <p:inputText value="#{universidadBean.universidad.autoridad}"
+                                                 onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)"/>
+                                </p:panelGrid>
+                                <p:separator />
+                                <p:commandButton value="AGREGAR" icon="ui-icon-disk"  update="dgUni :frmUn:idUniversidad" actionListener="#{universidadBean.ingresoUniversidad}"/>
+                                <p:commandButton value="CERRAR" process="@this" update="dgUni" icon="ui-icon-circle-close" oncomplete="PF('dlgUni').hide()" 
+                                                 actionListener="#{universidadBean.cerrar()}" >
+                                    <p:resetInput target="dgUni"/>
+                                </p:commandButton> 
+                            </p:outputPanel>
+                        </h:form>
+                    </p:dialog>
+                    <p:dialog  id="dlgInf" header="INFORMACIÓN DE LA UNIVERSIDAD" widgetVar="uniDialog" modal="true" showEffect="fade" hideEffect="fade" resizable="false">
+                        <h:form>
+                            <p:outputPanel style="text-align:center;">
+                                <p:panelGrid  columns="2" rendered="#{not empty universidadBean.universidad}" columnClasses="label,value">
+                                    <p:outputLabel value="CÓDIGO UNIVERSIDAD:" />
+                                    <p:outputLabel value="#{universidadBean.universidad.codUniversidad}"/>
+                                    <p:outputLabel value="TIPO UNIVERSIDAD:" />
+                                    <p:outputLabel value="#{universidadBean.universidad.tipoUniversidad}"/>
+                                    <p:outputLabel value="NOMBRE UNIVERSIDAD:" />
+                                    <p:outputLabel value="#{universidadBean.universidad.nomUniversidad}"/>
+                                    <p:outputLabel value="DIRECCIÓN:" />
+                                    <p:outputLabel value="#{universidadBean.universidad.direccionUniversidad}"/>
+                                    <p:outputLabel value="SITIO WEB:" />
+                                    <p:outputLabel value="#{universidadBean.universidad.sitioWeb}"/>
+                                    <p:outputLabel value=" TELÉFONO:" />
+                                    <p:outputLabel value="#{universidadBean.universidad.telefonoUniversidad}"/>
+                                    <p:outputLabel value="PAIS:" />
+                                    <p:outputLabel value="#{universidadBean.universidad.pais}"/>
+                                    <p:outputLabel value="PROVINCIA: " />
+                                    <p:outputLabel value="#{universidadBean.universidad.provincia}"/>
+                                    <p:outputLabel value="CIUDAD:" />
+                                    <p:outputLabel value="#{universidadBean.universidad.ciudad}"/>
+                                    <p:outputLabel value="NOMBRE AUTORIDAD:" />
+                                    <p:outputLabel value="#{universidadBean.universidad.autoridad}"/>
+                                </p:panelGrid>
+                            </p:outputPanel>
+                        </h:form>
+                    </p:dialog>
+                    <p:dialog  id="uniDetail1" header="DATOS UNIVERSIDAD" widgetVar="uniDialog1" modal="true" showEffect="fade" hideEffect="fade" resizable="false" closable="false">
+                        <h:form>
+                            <p:outputPanel  style="text-align:center;">
+                                <p:panelGrid  columns="2" id="pnlgActualizar" columnClasses="label,value">
+                                    <p:outputLabel value="CÓDIGO UNIVERSIDAD:" for="txtcodigo" />
+                                    <p:inputText id="txtcodigo" value="#{universidadBean.universidad.codUniversidad}" maxlength="4"
+                                                 required="true" requiredMessage="CÓDIGO ES UN CAMPO REQUERIDO" onkeypress="return soloNumeros(event)">
+                                        <p:message for="txtcodigo"/>
+                                    </p:inputText>
+                                    <p:outputLabel value="TIPO UNIVERSIDAD:"  for="tipoInst"/>
+                                    <h:panelGroup>
+                                        <p:selectOneMenu id="tipoInst" value="#{universidadBean.universidad.tipoUniversidad}" 
+                                                         required="true" requiredMessage="TIPO UNIVERSIDAD ES UN CAMPO REQUERIDO">
+                                            <f:selectItem itemLabel="SELECIONE UNO" itemValue="" />
+                                            <f:selectItems value="#{universidadBean.tipoUniversidad}" />
+                                            <p:message for="tipoInst"/>
+                                        </p:selectOneMenu>
+                                    </h:panelGroup>
+                                    <p:outputLabel value="NOMBRE UNIVERSIDAD:" for="txtUname" />
+                                    <p:inputText id="txtUname" value="#{universidadBean.universidad.nomUniversidad}"
+                                                 required="true" requiredMessage="NOMBRE DE INSTITUCIÓN ES REQUERIDA"
+                                                 onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)">
+                                        <p:message for="txtUname"/>
+                                    </p:inputText>
+                                    <p:outputLabel value="DIRECCIÓN:" />
+                                    <p:inputText value="#{universidadBean.universidad.direccionUniversidad}" onblur="cambiarMayuscula(this, 'null');"/>
+                                    <p:outputLabel value="SITIO WEB:" />
+                                    <p:inputText value="#{universidadBean.universidad.sitioWeb}"/>
+                                    <p:outputLabel value=" TELÉFONO:" for="tel"/>
+                                    <p:inputMask id="tel" value="#{universidadBean.universidad.telefonoUniversidad}" mask="(99) 9999-999"/>
+                                    <p:outputLabel value="PAIS:" for="txtpais"/>
+                                    <p:inputText  id="txtpais" value="#{universidadBean.universidad.pais}"
+                                                  required="true" requiredMessage="PAÍS ES UN CAMPO REQUERIDO" 
+                                                  onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)">
+                                        <p:message for="txtpais"/>
+                                    </p:inputText>
+                                    <p:outputLabel value="PROVINCIA: " for="txtprov"/>
+                                    <p:inputText id="txtprov" value="#{universidadBean.universidad.provincia}"
+                                                 required="true" requiredMessage="PROVINCIA ES UN CAMPO REQUERIDO"
+                                                 onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)">
+                                        <p:message for="txtprov"/>
+                                    </p:inputText>
+                                    <p:outputLabel value="CIUDAD:" for="txtciu"/>
+                                    <p:inputText id="txtciu" value="#{universidadBean.universidad.ciudad}"
+                                                 required="true" requiredMessage="CIUDAD ES UN CAMPO REQUERIDO"
+                                                 onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)">
+                                        <p:message for="txtciu"/>
+                                    </p:inputText>
+                                    <p:outputLabel value="NOMBRE AUTORIDAD:" />
+                                    <p:inputText value="#{universidadBean.universidad.autoridad}" onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)"/>
+                                </p:panelGrid>
+                                <p:separator/>
+                                <p:commandButton value="ACTUALIZAR" icon="ui-icon-pencil" actionListener="#{universidadBean.actualizarUniversidad}" update="pnlgActualizar :frmUn:idUniversidad" />
+                                <p:commandButton value="CERRAR" process="@this" update="pnlgActualizar" icon="ui-icon-close" oncomplete="PF('uniDialog1').hide()" 
+                                                 actionListener="#{universidadBean.cerrar()}" >
+                                    <p:resetInput target="pnlgActualizar"/>
+                                </p:commandButton> 
+                            </p:outputPanel>
+                        </h:form>
+                    </p:dialog>
+                </p:panel>
+
+                <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                    <h:form>
+                        <p:commandButton value="SI" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                        <p:commandButton value="NO" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+                    </h:form>
+                </p:confirmDialog>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>

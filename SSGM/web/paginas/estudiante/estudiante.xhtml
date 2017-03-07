@@ -1,0 +1,369 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <body>
+        <ui:composition template="./../../WEB-INF/plantillaAdmin.xhtml">
+            <ui:define name="content">
+                <script type="text/javascript">
+                    function start() {
+                        PF('statusDialog').show();
+                    }
+                    function error() {
+                        alert('Error al  general el reporte')
+                    }
+                    var myVar;
+
+                    function loadTime()
+                    {
+                        myVar = setTimeout(function () {
+                            PF('statusDialog').hide()
+                        }, 10000);
+                    }
+                    function resetTime()
+                    {
+                        clearTimeout(myVar);
+                    }
+                </script>
+                <h:form>
+                    <h:panelGrid columns="3">
+                        <p:outputLabel value="CARRERA:" style="margin-left: 15px" for="carselec"/>
+                        <h:panelGroup>
+                            <p:selectOneMenu id="carselec" value="#{estudianteBean.idCarrera}" style="margin-right: 100%"
+                                             required="true" requiredMessage="CARRERA ES UN CAMPO REQUERIDO">
+                                <f:selectItem itemLabel="SELECIONE UNO" itemValue="" />
+                                <f:selectItems value="#{estudianteBean.itemsCarrera}" />
+                                <p:ajax listener="#{estudianteBean.getLista}" update=":frmDG:txtcarrera :frmGra:pnlGra" event="change"></p:ajax>  
+                            </p:selectOneMenu>
+                        </h:panelGroup>
+                        <p:commandButton value="NUEVO" onclick="PF('dlgGra').show()"/>
+                    </h:panelGrid>
+                </h:form>
+                <p:separator/>
+                <h:form id="frmGra">
+                    <p:panel id="pnlGra" header="GRADUADOS">
+                        <p:dataTable id="listPersona" value="#{estudianteBean.recuperarGraduadoCarrera()}" var="personas" 
+                                     paginator="true" rows="5"
+                                     paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rowsPerPageTemplate="5,10,15,50" >
+                            <p:column headerText="NOMBRES" filterBy="#{personas.nombres}">
+                                <h:outputText value="#{personas.nombres}" />
+                            </p:column>
+                            <p:column headerText="APELLIDOS" filterBy="#{personas.apellidos}">
+                                <h:outputText value="#{personas.apellidos}" />
+                            </p:column>
+                            <p:column headerText="NÚMERO DE CÉDULA" filterBy="#{personas.numeroIdentificacion}">
+                                <h:outputText value="#{personas.numeroIdentificacion}" />
+                            </p:column>
+                            <p:column headerText="GÉNERO">
+                                <h:outputText value="#{personas.genero}" />
+                            </p:column>
+                            <p:column headerText="ESTADO CIVIL">
+                                <h:outputText value="#{personas.idEstadocivil.nomEstadocivil}" />
+                            </p:column>
+
+                            <p:column headerText="CARRERA">
+                                <h:outputText value="#{personas.idCarrera.nomCarrera}" />
+                            </p:column>
+                            <p:column headerText="ACCIONES">
+                                <p:commandButton  action="#{estudianteBean.recuperarDatosCedula(personas.numeroIdentificacion)}" update=":graduadoDetail" oncomplete="PF('graduadoDialog').show()" icon="ui-icon-search" title="VISTA"/>
+                                <p:commandButton  action="#{estudianteBean.recuperarDatosCedula(personas.numeroIdentificacion)}" update=":graduadoDetail1" oncomplete="PF('graduadoDialog1').show()" icon="ui-icon-pencil" title="ACTUALIZAR"/>
+                                <p:commandButton actionListener="#{estudianteBean.eliminarEstudiante(personas)}" update=":frmGra:listPersona" icon="ui-icon-circle-close">
+                                    <p:confirm header="ADVERTENCIA" message="¿ARE YOU SURE?" icon="ui-icon-alert" />
+                                    <p:growl id="message"/>
+                                </p:commandButton>
+                                <p:commandButton id="btnReporte" action="#{estudianteBean.validarPersona(personas.numeroIdentificacion)}" ajax="false"
+                                                 icon="ui-icon-arrowthickstop-1-s" title="DESCARGA ENCUESTA PDF" onclick="start();" onerror="error();"
+                                                 value="DESCARGA"/>  
+                            </p:column>
+                        </p:dataTable>
+                    </p:panel>
+                </h:form>
+                <p:dialog modal="true" widgetVar="statusDialog"
+                          onShow="loadTime();" onHide="resetTime();"
+                          header="ESPERE MIENTRAS SE PROCESA EL REPORTE..."
+                          draggable="false" closable="false" resizable="false">
+                    <center>
+                        <h:graphicImage value="/resources/imagen/descarga.gif" />
+                    </center>
+                </p:dialog>
+
+                <p:dialog id="graduadoDetail1" header="DATOS DEL GRADUADO" widgetVar="graduadoDialog1" modal="true" showEffect="fade" hideEffect="fade" resizable="false" closable="false">
+                    <h:form>
+                        <p:outputPanel  style="text-align:center;">
+                            <p:panelGrid id="pnlEst" columns="4"  columnClasses="label,value">
+                                <p:outputLabel value="CARRERA"/> 
+                                <p:outputLabel value="#{estudianteBean.persona.idCarrera.nomCarrera}"/>
+                                <p:outputLabel value="NOMBRES:" for="txtGname" />
+                                <p:inputText id="txtGname" value="#{estudianteBean.persona.nombres}"
+                                             required="true" requiredMessage="NOMBRES ES UN CAMPO REQUERIDO"
+                                             onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)">
+                                    <p:message for="txtGname"/>
+                                </p:inputText>
+                                <p:outputLabel value="APELLIDOS:" for="nomap"/>
+                                <p:inputText id="nomap" value="#{estudianteBean.persona.apellidos}"
+                                             required="true" requiredMessage="APELLIDOS ES UN CAMPO REQUERIDO"
+                                             onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)">
+                                    <p:message for="nomap"/>
+                                </p:inputText>
+                                <p:outputLabel value="Nº DE IDENTIFICACIÓN:" for="nuevacedula"/>
+                                <p:inputText id="nuevacedula" value="#{estudianteBean.numeroCedula}" 
+                                             required="true" requiredMessage="Nº DE IDENTIFICACIÓN ES UN CAMPO REQUERIDO"
+                                             onkeypress="return soloNumeros(event)" maxlength="10">
+                                    <p:message for="nuevacedula"/>
+                                </p:inputText>
+                                <p:outputLabel value="DIRECCIÓN:"/>
+                                <p:inputText  value="#{estudianteBean.persona.direccion}"
+                                              onblur="cambiarMayuscula(this, 'null');"/>
+                                <p:outputLabel value="PAÍS:" for="txtpais" />
+                                <h:panelGroup>
+                                    <p:message for="txtpais"/>
+                                    <p:selectOneMenu id="txtpais" value="#{estudianteBean.idPais}"
+                                                     required="true" requiredMessage="PAÍS ES UN CAMPO REQUERIDO">
+                                        <f:selectItem itemLabel="SELLECIONE UNO" itemValue="" />
+                                        <f:selectItems value="#{estudianteBean.itemsPais}" >
+                                        </f:selectItems>
+                                        <p:ajax event="change" listener="#{estudianteBean.getProvincias}" update="idProvincia1,ciudad1"></p:ajax>
+                                    </p:selectOneMenu>
+                                </h:panelGroup>
+                                <p:outputLabel value="PROVINCIA:" for="idProvincia1" />
+                                <h:panelGroup>
+                                    <p:message for="idProvincia1"/>
+                                    <p:selectOneMenu id="idProvincia1" value="#{estudianteBean.idProvincia}" 
+                                                     required="true" requiredMessage="PROVINCIA ES UN CAMPO REQUERIDO">
+                                        <f:selectItem itemLabel="SELECCIONE UNO" itemValue="" />
+                                        <f:selectItems value="#{estudianteBean.itemsProvincia}" >
+                                        </f:selectItems>
+                                        <p:ajax event="change" listener="#{estudianteBean.getCiudades}" update="ciudad1"></p:ajax>
+                                    </p:selectOneMenu>
+                                </h:panelGroup>
+                                <p:outputLabel value="CIUDAD:" for="ciudad1"/> 
+                                <h:panelGroup>
+                                    <p:message for="ciudad1"/>
+                                    <p:selectOneMenu id="ciudad1" value="#{estudianteBean.idCiudad}" disabled="#{estudianteBean.estadoCiudades}" 
+                                                     required="true" requiredMessage="CUIDAD ES UN CAMPO REQUERIDO">
+                                        <f:selectItem itemLabel="SELECCIONE UNO" itemValue="" />
+                                        <f:selectItems value="#{estudianteBean.itemsCiudad}" >
+                                        </f:selectItems>
+                                    </p:selectOneMenu>
+                                </h:panelGroup>
+                                <p:outputLabel value="FECHA DE NACIMIENTO:"/>     
+                                <p:calendar  value="#{estudianteBean.persona.fechaNacimiento}" 
+                                             showOn="button" locale="de" navigator="true" pattern="dd-MM-yyyy"
+                                             yearRange="1900:2100"/>
+                                <p:outputLabel value="LUGAR DE NACIMIENTO:" />
+                                <p:inputText value="#{estudianteBean.persona.lugarNacimiento}" 
+                                             onblur="cambiarMayuscula(this, 'null');"/>
+                                <p:outputLabel value="TELÉFONO FIJO:"/> 
+                                <p:inputText value="#{estudianteBean.persona.telefFijo}"
+                                             onkeypress="return soloNumeros(event)" maxlength="9"/>
+                                <p:outputLabel value="TELÉFONO MÓVIL:"/>
+                                <p:inputText value="#{estudianteBean.persona.telefMovil}"
+                                             onkeypress="return soloNumeros(event)" maxlength="10"/>
+                                <p:outputLabel value="CORREO:" for="txtemail"/>
+                                <p:inputText id="txtemail" value="#{estudianteBean.persona.correo}"
+                                             size="50" title="EJMEPLO: kaaf030191@gmail.com">
+                                    <f:validator validatorId="validatorEmail"/>
+                                    <h:panelGroup>
+                                        <p:tooltip for="txtemail" showEvent="focus" hideEvent="blur"/>
+                                        <p:message for="txtemail"/>
+                                    </h:panelGroup>
+                                </p:inputText>
+                                <p:outputLabel value="SEXO:"  for="genero"/>
+                                <h:panelGroup>
+                                    <p:message for="genero"/>
+                                    <p:selectOneMenu id="genero" value="#{estudianteBean.persona.genero}" 
+                                                     required="true" requiredMessage="GÉNERO ES UN CAMPO REQUERIDO">
+                                        <f:selectItem itemLabel="SELECCIONE UNO" itemValue=""/>
+                                        <f:selectItems value="#{estudianteBean.genero}" />
+                                    </p:selectOneMenu>
+                                </h:panelGroup>
+                                <p:outputLabel value="EDAD:" />
+                                <p:inputText value="#{estudianteBean.persona.edad}" onkeypress="return soloNumeros(event)"/>
+                                <p:outputLabel value="ESTADO CIVIL:"/>
+                                <h:panelGroup>
+                                    <p:message for="estado"/>
+                                    <p:selectOneMenu id="estado" value="#{estudianteBean.idEstadoCivil}"
+                                                     required="true" requiredMessage="ESTADO CIVIL ES UN CAMPO REQUERIDO">
+                                        <f:selectItem itemLabel="SELECCIONE UNO" itemValue="" />
+                                        <f:selectItems value="#{estudianteBean.itemsEstadoCivil}" >
+                                        </f:selectItems>
+                                    </p:selectOneMenu>
+                                </h:panelGroup>
+                            </p:panelGrid>
+                            <p:separator />
+                            <p:commandButton value="ACTUALIZAR" icon="ui-icon-pencil" actionListener="#{estudianteBean.editarPersona}"  update="pnlEst :frmGra:listPersona"  />
+                            <p:commandButton value="CERRAR" process="@this" update="pnlEst" icon="ui-icon-close" oncomplete="PF('graduadoDialog1').hide()" 
+                                             actionListener="#{estudianteBean.cerrar()}" >
+                                <p:resetInput target="pnlEst"/>
+                            </p:commandButton> 
+                        </p:outputPanel>
+                    </h:form>
+                </p:dialog>
+
+                <p:dialog  id="graduadoDetail" header="INFORMACIÓN DEL GRADUADO" widgetVar="graduadoDialog" modal="true" showEffect="fade" hideEffect="fade" resizable="false">
+                    <h:form>
+                        <p:outputPanel style="text-align:center;">
+                            <p:panelGrid  columns="2" rendered="#{not empty estudianteBean.persona}" columnClasses="label,value">
+                                <p:outputLabel value="NOMBRES:"/>
+                                <p:outputLabel value="#{estudianteBean.persona.nombres}"/>
+                                <p:outputLabel value="APELLIDOS:"/> 
+                                <p:outputLabel value="#{estudianteBean.persona.apellidos}"/>
+                                <p:outputLabel value="Nº DE IDENTIFICACIÓN:" />
+                                <p:outputLabel value="#{estudianteBean.persona.numeroIdentificacion}" />
+                                <p:outputLabel value="DIRECCIÓN:" />
+                                <p:outputLabel value="#{estudianteBean.persona.direccion}"/> 
+                                <p:outputLabel value="PAÍS:" />
+                                <p:outputLabel value="#{estudianteBean.persona.idCiudad.idProvincia.idPais.nomPais}"/>
+                                <p:outputLabel value="PROVINCIA:" />
+                                <p:outputLabel value="#{estudianteBean.persona.idCiudad.idProvincia.nomProvincia}"/>
+                                <p:outputLabel value="CIUDAD:"/> 
+                                <p:outputLabel value="#{estudianteBean.persona.idCiudad.nomCiudad}"/>
+                                <p:outputLabel  value="FECHA DE NACIMIENTO:"/>
+                                <p:outputLabel  value="#{estudianteBean.persona.fechaNacimiento}" >                              
+                                    <f:convertDateTime pattern="dd-MM-yyyy"/>
+                                </p:outputLabel>
+                                <p:outputLabel value="LUGAR DE NACIMIENTO:" />
+                                <p:outputLabel value="#{estudianteBean.persona.lugarNacimiento}" />
+                                <p:outputLabel value="TELÉFONO FIJO:"/> 
+                                <p:outputLabel value="#{estudianteBean.persona.telefFijo}" />
+                                <p:outputLabel value="TELÉFONO MÓVIL:"/>
+                                <p:outputLabel value="#{estudianteBean.persona.telefMovil}"/>
+                                <p:outputLabel value="CORREO:" />
+                                <p:outputLabel value="#{estudianteBean.persona.correo}"/>
+                                <p:outputLabel value="GÉNERO:" />
+                                <p:outputLabel value="#{estudianteBean.persona.genero}"/>
+                                <p:outputLabel value="EDAD:" />
+                                <p:outputLabel value="#{estudianteBean.persona.edad}"/>
+                                <p:outputLabel value="ESTADO CIVIL:"/>
+                                <p:outputLabel value="#{estudianteBean.persona.idEstadocivil.nomEstadocivil}"/>
+                                <p:outputLabel value="CARRERA"/> 
+                                <p:outputLabel value="#{estudianteBean.persona.idCarrera.nomCarrera}"/>
+                            </p:panelGrid>
+                        </p:outputPanel>
+                    </h:form>
+                </p:dialog>
+
+                <p:dialog header="DATOS DEL GRADUADO" widgetVar="dlgGra" modal="true" showEffect="fade" resizable="false" closable="false">
+                    <h:form id="frmDG">
+                        <p:outputPanel id="datosItemDetail" style="text-align:center;">
+                            <p:panelGrid id="pnlEstu" columns="4" style="padding-left: 100px" >
+                                <p:outputLabel value="CARRERA" /> 
+                                <p:outputLabel id="txtcarrera" value="#{estudianteBean.carrera.nomCarrera}"/>
+                                <p:outputLabel  value="NOMBRES:" for="txtname"/>
+                                <p:inputText id="txtname" value="#{estudianteBean.persona.nombres}"
+                                             required="true" requiredMessage="NOMBRES ES UN CAMPO REQUERIDO"
+                                             onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)">
+                                    <p:message for="txtname"/>
+                                </p:inputText>
+                                <p:outputLabel value="APELLIDOS:" for="txtlast"/> 
+                                <p:inputText id="txtlast" value="#{estudianteBean.persona.apellidos}" 
+                                             required="true" requiredMessage="APELLIDOS: ES UN CAMPO REQUERIDO"
+                                             onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)">
+                                    <p:message for="txtlast"/>
+                                </p:inputText>
+                                <p:outputLabel value="Nº DE IDENTIFICACIÓN:" for="cedula"/>
+                                <p:inputText id="cedula" value="#{estudianteBean.persona.numeroIdentificacion}"
+                                             required="true" requiredMessage="Nº DE IDENTIFICACIÓN ES UN CAMPO REQUERIDO"
+                                             onkeypress="return soloNumeros(event)" maxlength="10">
+                                    <p:message for="cedula"/>
+                                </p:inputText>
+                                <p:outputLabel value="DIRECCIÓN:" />
+                                <p:inputText value="#{estudianteBean.persona.direccion}" onblur="cambiarMayuscula(this, 'null');"  />
+                                <p:outputLabel value="PAÍS:" for="txtpais"/>
+                                <h:panelGroup>
+                                    <p:message for="txtpais"/>
+                                    <p:selectOneMenu id="txtpais" value="#{estudianteBean.idPais}"
+                                                     required="true" requiredMessage="PAÍS ES UN CAMPO REQUERIDO">
+                                        <f:selectItem itemLabel="SELLECIONE UNO" itemValue=""/>
+                                        <f:selectItems value="#{estudianteBean.itemsPais}" >
+                                        </f:selectItems>
+                                        <p:ajax event="change" listener="#{estudianteBean.getProvincias}" update="idProvincia,idciudad"></p:ajax>
+                                    </p:selectOneMenu>
+                                </h:panelGroup>
+                                <p:outputLabel value="PROVINCIA:" for="idProvincia"/>
+                                <h:panelGroup>
+                                    <p:message for="idProvincia"/>
+                                    <p:selectOneMenu id="idProvincia" value="#{estudianteBean.idProvincia}" disabled="#{estudianteBean.estadoProvincias}"
+                                                     required="true" requiredMessage="PROVINCIA ES UN CAMPO REQUERIDO">
+                                        <f:selectItem itemLabel="SELECCIONE UNO" itemValue="" />
+                                        <f:selectItems value="#{estudianteBean.itemsProvincia}" >
+                                        </f:selectItems>
+                                        <p:ajax event="change" listener="#{estudianteBean.getCiudades}" update="idciudad"></p:ajax>
+                                    </p:selectOneMenu>
+                                </h:panelGroup>
+                                <p:outputLabel value="CIUDAD:" for="idciudad"/> 
+                                <h:panelGroup>
+                                    <p:message for="idciudad"/>
+                                    <p:selectOneMenu id="idciudad" value="#{estudianteBean.idCiudad}" disabled="#{estudianteBean.estadoCiudades}"
+                                                     required="true" requiredMessage="CIUDAD ES UN CAMPO REQUERIDO">
+                                        <f:selectItem itemLabel="SELECCIONE UNO" itemValue="" />
+                                        <f:selectItems value="#{estudianteBean.itemsCiudad}" >
+                                        </f:selectItems>
+                                    </p:selectOneMenu>
+                                </h:panelGroup>
+                                <p:outputLabel  value="FECHA DE NACIMIENTO:"/>
+                                <p:calendar  showOn="button" id="idFechaNac" value="#{estudianteBean.persona.fechaNacimiento}" 
+                                             locale="de" navigator="true" pattern="dd-MM-yyyy" yearRange="1900:2100"/>                              
+                                <p:outputLabel value="LUGAR DE NACIMIENTO:" />
+                                <p:inputText value="#{estudianteBean.persona.lugarNacimiento}" onblur="cambiarMayuscula(this, 'null');"/>
+                                <p:outputLabel value="TELÉFONO FIJO:"/> 
+                                <p:inputText value="#{estudianteBean.persona.telefFijo}" onkeypress="return soloNumeros(event)" maxlength="9"/>
+                                <p:outputLabel value="TELÉFONO MÓVIL:"/>
+                                <p:inputText value="#{estudianteBean.persona.telefMovil}" onkeypress="return soloNumeros(event)" maxlength="10"/>
+                                <p:outputLabel value="CORREO:" for="txtemail"/>
+                                <p:inputText id="txtemail" value="#{estudianteBean.persona.correo}"
+                                             size="50" title="EJMEPLO: kaaf030191@gmail.com">
+                                    <f:validator validatorId="validatorEmail"/>
+                                    <h:panelGroup>
+                                        <p:tooltip for="txtemail" showEvent="focus" hideEvent="blur"/>
+                                        <p:message for="txtemail"/>
+                                    </h:panelGroup>
+                                </p:inputText>
+                                <p:outputLabel value="GÉNERO:" for="txtgenero"/>
+                                <h:panelGroup>
+                                    <p:message for="txtgenero"/>
+                                    <p:selectOneMenu id="txtgenero" value="#{estudianteBean.persona.genero}" 
+                                                     required="true" requiredMessage="GÉNERO ES UN CAMPO REQUERIDO">
+                                        <f:selectItem itemLabel="SELECCIONE UNO" itemValue="" />
+                                        <f:selectItems value="#{estudianteBean.genero}" />
+                                    </p:selectOneMenu>
+                                </h:panelGroup>
+                                <p:outputLabel value="EDAD:" />
+                                <p:inputText value="#{estudianteBean.persona.edad}" onkeypress="return soloNumeros(event)"/>
+                                <p:outputLabel value="ESTADO CIVIL:" for="txtestado"/>
+                                <h:panelGroup>
+                                    <p:message for="txtestado"/>
+                                    <p:selectOneMenu id="txtestado" value="#{estudianteBean.idEstadoCivil}"
+                                                     required="true" requiredMessage="ESTADO CIVIL ES UN CAMPO REQUERIDO">
+                                        <f:selectItem itemLabel="SELECCIONE UNO" itemValue=""/>
+                                        <f:selectItems value="#{estudianteBean.itemsEstadoCivil}"/>
+                                    </p:selectOneMenu>
+                                </h:panelGroup>
+                            </p:panelGrid>
+                            <p:separator/>
+                            <p:commandButton  value="AGREGAR" icon="ui-icon-disk" update="pnlEstu :frmGra:pnlGra" actionListener="#{estudianteBean.crearPersona}" />
+                            <p:commandButton value="CERRAR" process="@this" update="pnlEstu" icon="ui-icon-circle-close" oncomplete="PF('dlgGra').hide()" 
+                                             actionListener="#{estudianteBean.cerrar()}" >
+                                <p:resetInput target="pnlEstu"/>
+                            </p:commandButton> 
+                        </p:outputPanel>
+                    </h:form>
+                </p:dialog>
+
+
+                <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                    <h:form>
+                        <p:commandButton value="SI" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                        <p:commandButton value="NO" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+                    </h:form>
+                </p:confirmDialog>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>

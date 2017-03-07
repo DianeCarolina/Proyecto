@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <script type="text/javascript" src="/SSGM/resources/js/utils.js"/>
+        <h:outputStylesheet name="./css/default.css"/>
+        <h:outputStylesheet name="./css/cssLayout.css"/>
+        <title>SEGUIMIENTO A GRADUADOS</title>
+    </h:head>
+    <h:body>
+        <div id="top" class="top">
+            <h:panelGrid columns="2">
+                <h:graphicImage value="/resources/imagen/uce.png" style="padding-left: 20px"/>
+                <h2>UNIVERSIDAD CENTRAL DEL ECUADOR</h2>
+                <h3>FACULTAD DE CIENCIAS MÉDICAS</h3>
+            </h:panelGrid>  
+        </div >
+        <h:form>
+            <div id="content" class="center_content">
+                <p:growl id="massages"/>
+                <p:menubar>
+                    <p:menuitem value="INICIO" url="/paginas/inicio.jsf" icon="ui-icon-home" />
+                    <p:menuitem value="FICHA" url="/paginas/pagCliente/reporte.jsf" icon="ui-icon-document"/> 
+                    <p:menuitem value="REGISTRO" url="/paginas/pagCliente/validar_registro.jsf" icon="ui-icon-note"/> 
+                    <p:menuitem value="CONTACTOS" url="/paginas/pagCliente/contactos.jsf" icon="ui-icon-mail-closed" />
+                    <f:facet name="options">
+                        <p:commandButton  value="INICIAR SESIÓN" icon="ui-icon-person" action="/paginas/login/login.jsf" />
+                    </f:facet>
+                </p:menubar>
+            </div>
+        </h:form>
+        <div id="content" class="center_content">
+            <ui:insert name="content">Content</ui:insert>
+        </div>
+    </h:body>
+</html>

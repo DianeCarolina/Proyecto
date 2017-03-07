@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+  <persistence-unit name="SSGMPU" transaction-type="JTA">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <jta-data-source>conSeguimiento</jta-data-source>
+    <class>ec.edu.uce.medicina.seguimiento.modelo.Carrera</class>
+    <class>ec.edu.uce.medicina.seguimiento.modelo.Categoria</class>
+    <class>ec.edu.uce.medicina.seguimiento.modelo.Ciudad</class>
+    <class>ec.edu.uce.medicina.seguimiento.modelo.Encuesta</class>
+    <class>ec.edu.uce.medicina.seguimiento.modelo.EstadoCivil</class>
+    <class>ec.edu.uce.medicina.seguimiento.modelo.Facultad</class>
+    <class>ec.edu.uce.medicina.seguimiento.modelo.Paginas</class>
+    <class>ec.edu.uce.medicina.seguimiento.modelo.Pais</class>
+    <class>ec.edu.uce.medicina.seguimiento.modelo.Perfil</class>
+    <class>ec.edu.uce.medicina.seguimiento.modelo.PerfilPaginas</class>
+    <class>ec.edu.uce.medicina.seguimiento.modelo.Persona</class>
+    <class>ec.edu.uce.medicina.seguimiento.modelo.Pregunta</class>
+    <class>ec.edu.uce.medicina.seguimiento.modelo.Provincia</class>
+    <class>ec.edu.uce.medicina.seguimiento.modelo.Respuesta</class>
+    <class>ec.edu.uce.medicina.seguimiento.modelo.Resultado</class>
+    <class>ec.edu.uce.medicina.seguimiento.modelo.TipoPregunta</class>
+    <class>ec.edu.uce.medicina.seguimiento.modelo.Universidad</class>
+    <class>ec.edu.uce.medicina.seguimiento.modelo.Usuario</class>
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+    <properties>
+      <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
+      <property name="hibernate.show_sql" value="true"/>
+      <property name="hibernate.format_sql" value="true"/>
+    </properties>
+  </persistence-unit>
+</persistence>

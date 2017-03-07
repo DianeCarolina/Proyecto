@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+    <body>
+        <ui:composition template="./../../WEB-INF/plantillaCliente.xhtml">
+            <ui:define name="content">
+                <h:form>
+                    <p:panel header="SISTEMA DE SEGUIMIENTO A GRADUADOS">
+                        <center>
+                            <h:graphicImage value="/resources/imagen/graduados2.png"/>
+                        </center>
+                    </p:panel>
+                    <p:separator/>
+                    <p:panel header="CONTÁCTOS" >
+                        <h4> DIRECCIÓN:</h4>
+                        <p style="line-height: 200%" class="entry" align="left" >
+                            Iquique N14-121 y Sodiro -Itchimbía, Sector El Dorado
+                        </p>
+                        <h4> TELÉFONOS:</h4>
+                        <p style="line-height: 200%" class="entry" align="left" >
+                            (593-02) 2528 690; (593-02) 2528820; (593-02) 2520 164
+                        </p>
+                        <h4> Horarios de Atención:</h4>
+                        <p style="line-height: 200%" class="entry" align="left" >
+                            Administración: 08h00-16h30
+                        </p>
+                        <p style="line-height: 200%" class="entry" align="left" >
+                            Clases: 07h00-11h00; 13h00-20h00
+                        </p>
+                    </p:panel>
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>

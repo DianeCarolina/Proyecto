@@ -1,0 +1,412 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <body>
+        <ui:composition template="./../../WEB-INF/plantillaAdmin.xhtml">
+            <ui:define name="content">
+                <h:form>
+                    <p:messages/>
+                    <h:panelGrid columns="3">
+                        <p:outputLabel value="CARRERA:" style="margin-left: 15px" for="carselec"/>
+                        <h:panelGroup>
+                            <p:selectOneMenu id="carselec" value="#{cuestionarioBean.idCarrera}" style="margin-right: 100%" 
+                                             required="true" requiredMessage="CARRERA ES UN CAMPO REQUERIDO">
+                                <f:selectItem itemLabel="SELECIONE UNO" itemValue="" />
+                                <f:selectItems value="#{cuestionarioBean.itemsCarrera}" />
+                                <p:ajax listener="#{cuestionarioBean.getLista}" 
+                                        update=":frmDE:txtcarr :frmEnc:tableEncuesta" 
+                                        event="change"></p:ajax>  
+                            </p:selectOneMenu>
+                        </h:panelGroup>
+                        <p:commandButton value="NUEVO" onclick="PF('encDialog').show()"  /> 
+                    </h:panelGrid>
+                </h:form>
+                <p:separator/>
+                <p:panel id="pnlPrincipal" header="ENCUESTA">
+                    <!--ENCUESTA LISTADO Y CREACION CON SUS ACCIONES-->
+                    <h:form id="frmEnc">
+                        <p:dataTable id="tableEncuesta" value="#{cuestionarioBean.listaEncuestaCarrera()}" var="encuestaItem" paginator="true" rows="5"
+                                     selectionMode="single" selection="#{cuestionarioBean.encuestaActiva}"
+                                     rowKey="#{encuestaItem.idEncuesta}"
+                                     paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rowsPerPageTemplate="5,10,15,50">
+                            <p:ajax event="rowSelect" listener="#{cuestionarioBean.onRowSelect}"  update="btnVisualizar"/>
+                            <p:ajax event="rowUnselect" listener="#{cuestionarioBean.onRowUnselect}"/>
+                            <p:column headerText="CARRERA" >
+                                <h:outputLabel value="#{encuestaItem.idCarrera.nomCarrera}" />
+                            </p:column>
+                            <p:column headerText="TÍTULO DE LA ENCUESTA" filterBy="#{encuestaItem.tituloEncuesta}">
+                                <h:outputLabel value="#{encuestaItem.tituloEncuesta}" />
+                            </p:column>
+                            <p:column headerText="FECHA INICIO" >
+                                <h:outputLabel value="#{cuestionarioBean.formatoDate(encuestaItem.fechaInicio)}" />
+                            </p:column>
+                            <p:column headerText="FECHA FINAL" >
+                                <h:outputLabel value="#{cuestionarioBean.formatoDate(encuestaItem.fechaFinal)}" />
+                            </p:column>
+                            <p:column headerText="HABILITADO">
+                                <h:outputText value="ACTIVO" rendered="#{encuestaItem.activo==true}"/>
+                                <h:outputText value="INACTIVO" rendered="#{encuestaItem.activo==false}"/>
+                            </p:column> 
+                            <p:column  headerText="ACCIONES">
+                                <p:commandButton value="SELECCIONAR" icon="ui-icon-check" actionListener="#{cuestionarioBean.recuperarEncuestaPorId(encuestaItem.idEncuesta)}" 
+                                                 update=":frmCat:panelCategoria :frmTCat" />
+                                <p:commandButton actionListener="#{cuestionarioBean.recuperarEncuestaPorId(encuestaItem.idEncuesta)}" 
+                                                 oncomplete="PF('aencDialog').show()" update=":dlgAcEnc"  icon="ui-icon-pencil" title="EDITAR" />
+                            </p:column>
+                            <f:facet name="footer">
+                                <p:commandButton   disabled="#{cuestionarioBean.estadoBtnVisualizar}" id="btnVisualizar"
+                                                   onsuccess="PF('dlgVisuEncuesta').show();"
+                                                   update=":frmEnc:panelGridEncuesta" icon="ui-icon-search" title="VISUALIZAR" value="VISUALIZAR"/>
+                            </f:facet>
+                        </p:dataTable>
+                        <p:dialog header="VISUALIZAR ENCUESTA" widgetVar="dlgVisuEncuesta" modal="true" height="400" id="idDlgVisuEncuesta" showEffect="fade" hideEffect="fade">
+                            <center>
+                                <p:panelGrid id="panelGridEncuesta" binding="#{cuestionarioBean.panelGrid}"/>
+                            </center>
+                        </p:dialog> 
+                    </h:form>
+                    <br/> 
+                    <!--CATEGORIA LISTADO Y CREACION CON SUS ACCIONES-->
+                    <h:form id="frmCat">
+                        <p:panel id="cat" header="CATEGORÍA">
+                            <h:panelGrid columns="2" id="panelCategoria">
+                                <p:outputLabel value="ENCUESTA:"/>
+                                <p:outputLabel value="#{cuestionarioBean.encuestatemp.tituloEncuesta}"/>
+                                <p:outputLabel value="CATEGORÍA:" for="txtCat"/>
+                                <p:inputText  id="txtCat" maxlength="1000" required="true" requiredMessage="CATEGORÍA ES UN CAMPO REQUERIDO" style="width: 600px"
+                                              value="#{cuestionarioBean.categoria.nomCategoria}" >
+                                    <p:message for="txtCat"/>
+                                </p:inputText>
+                                <p:outputLabel value="ORDEN:" for="txtOrden1"/>
+                                <p:inputText id="txtOrden1" maxlength="6" value="#{cuestionarioBean.categoria.orden}"  
+                                             required="true" requiredMessage="EL ORDEN ES UN CAMPO REQUERIDO">
+                                    <p:message for="txtOrden1"/>
+                                </p:inputText>
+                            </h:panelGrid> 
+                            <br/>
+                            <p:commandButton style="right: -50px" value="AGREGAR"  action="#{cuestionarioBean.crearCategoria}"
+                                             update=":frmCat,frmTCat" icon="ui-icon-disk" />
+                        </p:panel>
+                    </h:form>
+                    <br/><br/>
+                    <h:form id="frmTCat">
+                        <p:dataTable id="tableCategoria" value="#{cuestionarioBean.listaCategoriaEncuesta()}" var="categoriaItem" paginator="true" rows="5"
+                                     paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rowsPerPageTemplate="5,10,15,50" >
+                            <p:column headerText="CATEGORIA" filterBy="#{categoriaItem.nomCategoria}">
+                                <h:outputText value="#{categoriaItem.nomCategoria}"/>
+                            </p:column>  
+                            <p:column headerText="ORDEN" >
+                                <h:outputText value="#{categoriaItem.orden}"/>
+                            </p:column> 
+                            <p:column headerText="ACCIONES">
+                                <p:commandButton actionListener="#{cuestionarioBean.recuperarCategoriaPorId(categoriaItem.idCategoria)}" 
+                                                 oncomplete="PF('acatDialog').show()" update=":dlgACat"  icon="ui-icon-pencil" title="EDITAR" />
+                                <p:commandButton  actionListener="#{cuestionarioBean.eliminarCategoria(categoriaItem)}" title="ELIMINAR"  update=":frmTCat:tableCategoria" icon="ui-icon-circle-close" > 
+                                    <p:confirm header="ADVERTENCIA" message="Are you sure?" icon="ui-icon-alert" />
+                                    <p:growl id="message"/>
+                                </p:commandButton>
+                                <p:commandButton value="PREGUNTA" action="#{cuestionarioBean.recuperarCategoriaPorId(categoriaItem.idCategoria)}" 
+                                                 update=":frmPre:pnlPregunta :frmTPre"  icon="ui-icon-plusthick"/>
+                            </p:column>
+                        </p:dataTable>
+                    </h:form>
+                    <br/>
+
+                    <!--PREGUNTA LISTADO Y CREACION CON SUS ACCIONES-->
+                    <h:form id="frmPre">
+                        <p:panel header="INGRESAR PREGUNTA" id="pnlPregunta">
+                            <h:panelGrid columns="2">
+                                <p:outputLabel value="CATEGORÍA:"/>
+                                <p:outputLabel value="#{cuestionarioBean.categoriatemp.nomCategoria}"/>
+                                <p:outputLabel value="PREGUNTA:" for="txtPre"/>
+                                <p:inputText id="txtPre" maxlength="1000" value="#{cuestionarioBean.pregunta.texto}" style="width: 600px"
+                                             required="true" requiredMessage="PREGUNTA ES UN CAMPO REQUERIDO">
+                                    <p:message for="txtPre"/>
+                                </p:inputText>
+                                <p:outputLabel value="ORDEN:" for="txtOrden2"/>
+                                <p:inputText id="txtOrden2" value="#{cuestionarioBean.pregunta.orden}"/>
+                                <p:outputLabel value="REQUERIDO"/>
+                                <p:selectBooleanCheckbox value="#{cuestionarioBean.pregunta.requerida}"/>
+                                <p:outputLabel value="TIPO PREGUNTA:" for="idTipoPregunta"/>
+                                <h:panelGroup>
+                                    <p:message for="idTipoPregunta"/>
+                                    <p:selectOneMenu id="idTipoPregunta" value="#{cuestionarioBean.nuevaIdTP}"
+                                                     required="true" requiredMessage="TIPO PREGUNTA ES UN CAMPO REQUERIDO">
+                                        <f:selectItem itemLabel="SELECCIONE UNO" itemValue=""/>
+                                        <f:selectItems value="#{cuestionarioBean.itemsTipoPregunta}"/>
+                                    </p:selectOneMenu>
+                                </h:panelGroup>
+                            </h:panelGrid>
+                            <br/>
+                            <p:commandButton style="right: -50px" value="AGREGAR"  actionListener="#{cuestionarioBean.crearPregunta}" 
+                                             update=":frmPre,frmTPre" icon="ui-icon-disk"/>
+                        </p:panel>
+                    </h:form>
+                    <br/><br/>
+                    <h:form id="frmTPre">
+                        <p:dataTable id="tablePregunta" value="#{cuestionarioBean.listaPreguntaCategoria()}" var="preguntaItem" paginator="true" rows="5"
+                                     paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rowsPerPageTemplate="5,10,15,50">
+                            <p:column headerText="PREGUNTA" filterBy="#{preguntaItem.pregunta.texto}">
+                                <h:outputText value="#{preguntaItem.pregunta.texto}"/>
+                            </p:column>  
+                            <p:column headerText="ORDEN" >
+                                <h:outputText value="#{preguntaItem.pregunta.orden}"/>
+                            </p:column> 
+                            <p:column headerText="TIPO PREGUNTA" >
+                                <h:outputText value="#{preguntaItem.pregunta.idTipopregunta.nomTipopregunta}"/>
+                            </p:column> 
+                            <p:column headerText="ACCIONES">
+                                <p:commandButton actionListener="#{cuestionarioBean.recuperarPreguntaPorId(preguntaItem.pregunta.idPregunta)}" 
+                                                 oncomplete="PF('apreDialog').show()" update=":dlgAPre"  icon="ui-icon-pencil" title="EDITAR" />
+                                <p:commandButton  actionListener="#{cuestionarioBean.eliminarPregunta(preguntaItem.pregunta)}" title="ELIMINAR" update="tablePregunta" icon="ui-icon-circle-close" >                                   
+                                    <p:confirm header="ADVERTENCIA" message="Are you sure?" icon="ui-icon-alert"  />
+                                    <p:growl id="message"/>
+                                </p:commandButton>
+                                <p:commandButton value="RESPUESTA" icon="ui-icon-plusthick" 
+                                                 actionListener="#{cuestionarioBean.recuperarPreguntaPorId(preguntaItem.pregunta.idPregunta)}" 
+                                                 oncomplete="PF('respDialog').show()"  update=":dlgResp"  disabled="#{preguntaItem.estado}"/>
+                            </p:column>
+                        </p:dataTable>
+                    </h:form>
+                </p:panel>
+                <p:separator/>
+
+                <!--INGRESO Y ACTUALIZACIÓN DE LA ENCUESTA -->
+                <p:dialog header="INGRESO DE DATOS ENCUESTA" widgetVar="encDialog" modal="true" showEffect="fade" resizable="false" closable="false">
+                    <h:form id="frmDE">
+                        <p:outputPanel id="encDetail" style="text-align: center;">
+                            <p:panelGrid id="pnlgEncuesta" columns="2">
+                                <p:outputLabel value="CARRERA:"/> 
+                                <p:outputLabel id="txtcarr" value="#{cuestionarioBean.carrera.nomCarrera}"/>
+                                <p:outputLabel value="TÍTULO DE LA ENCUESTA:" for="txtTitulo"  />
+                                <p:inputText id="txtTitulo" value="#{cuestionarioBean.encuesta.tituloEncuesta}" required="true" 
+                                             requiredMessage="EL TITULO ES UN CAMPO ES REQUERIDO" style="width: 400px" >
+                                    <p:message for="txtTitulo"/>
+                                </p:inputText>                                  
+                                <p:outputLabel value="FECHA INICIO:" for="finicial" />
+                                <h:panelGroup>
+                                    <p:calendar id="finicial" value="#{cuestionarioBean.encuesta.fechaInicio}" 
+                                                pattern="dd-MM-yyyy" navigator="true" 
+                                                required="true" requiredMessage="FECHA DE INICIO REQUERIDA"
+                                                onkeypress="return permite(event, 'none')" 
+                                                showOn="button" title="Ejemplo: dd-mm-yyyy"  
+                                                effect="fadeIn" effectDuration="100">
+                                        <p:ajax event="dateSelect" update="ffinal" />   
+                                        <p:message for="finicial"/>
+                                    </p:calendar>
+                                </h:panelGroup>
+                                <p:outputLabel value="FECHA DE FIN:" style="font-weight:bold" for="ffinal"/>
+                                <h:panelGroup>
+                                    <p:calendar id="ffinal"  value="#{cuestionarioBean.encuesta.fechaFinal}"
+                                                mindate="#{cuestionarioBean.encuesta.fechaInicio}" navigator="true" 
+                                                showOn="button" title="Ejemplo: dd-mm-yyyy"  pattern="dd-MM-yyyy" required="true" 
+                                                requiredMessage="FECHA FIN REQUERIDA" 
+                                                onkeypress=" return permite(event, 'none')" >
+                                        <f:attribute name="finicial" value="#{cuestionarioBean.encuesta.fechaInicio}"/>
+                                        <f:validator validatorId="validatorRangoFechas" />
+                                        <p:message for="ffinal"/>
+                                    </p:calendar>
+                                </h:panelGroup>
+                                <p:outputLabel value="ESTADO:"/>
+                                <p:selectBooleanCheckbox value="#{cuestionarioBean.encuesta.activo}"/>
+                            </p:panelGrid>
+                            <p:separator/>
+                            <p:commandButton  value="GUARDAR" icon="ui-icon-disk" actionListener="#{cuestionarioBean.crearEncuesta}"  
+                                              update="pnlgEncuesta :frmEnc:tableEncuesta"/>
+                            <p:commandButton value="CERRAR" process="@this" update="pnlgEncuesta" icon="ui-icon-circle-close" oncomplete="PF('encDialog').hide()" 
+                                             actionListener="#{cuestionarioBean.cerrar()}" >
+                                <p:resetInput target="pnlgEncuesta"/>
+                            </p:commandButton>
+                        </p:outputPanel>
+                    </h:form>
+                </p:dialog>
+                <p:dialog id="dlgAcEnc" header="EDITAR LA ENCUESTA" widgetVar="aencDialog"  modal="true" showEffect="fade" hideEffect="fade" resizable="false" closable="false">
+                    <h:form>
+                        <p:outputPanel id="encuestaDetail" style="text-align:center;">
+                            <p:panelGrid id="pnlgAEnc" rendered="#{not empty cuestionarioBean.encuestatemp}" columns="2">
+                                <p:outputLabel value="CARRERA: "/>
+                                <p:outputLabel value="#{cuestionarioBean.encuestatemp.idCarrera.nomCarrera}"  />
+                                <p:outputLabel value="TITULO DE LA ENCUESTA:" />
+                                <p:outputLabel   value="#{cuestionarioBean.encuestatemp.tituloEncuesta}"  />
+                                <p:outputLabel value="FECHA DE INICIO: " style="font-weight:bold" for="finicial"/>
+                                <h:panelGroup>
+                                    <p:calendar id="finicial" value="#{cuestionarioBean.encuestatemp.fechaInicio}" 
+                                                locale="de" pattern="dd-MM-yyyy" navigator="true" 
+                                                requiredMessage="FECHA DE INICIO REQUERIDA"
+                                                onkeypress="return permite(event, 'none')" 
+                                                showOn="button" title="Ejemplo: dd-mm-yyyy"  
+                                                effect="fadeIn" effectDuration="100">
+                                        <p:ajax event="dateSelect" update="ffinal" />   
+                                        <p:message for="finicial"/>
+                                    </p:calendar>
+                                </h:panelGroup>
+                                <p:outputLabel value="FECHA DE FIN:" style="font-weight:bold" for="ffinal"/>
+                                <p:calendar id="ffinal"  value="#{cuestionarioBean.encuestatemp.fechaFinal}"
+                                            mindate="#{cuestionarioBean.encuestatemp.fechaInicio}" navigator="true" locale="de"
+                                            showOn="button" title="Ejemplo: dd-mm-yyyy"  pattern="dd-MM-yyyy"  
+                                            requiredMessage="FECHA FIN REQUERIDA" 
+                                            onkeypress=" return permite(event, 'none')" 
+                                            effect="fadeIn" effectDuration="100">
+                                    <f:attribute name="finicial" value="#{cuestionarioBean.encuestatemp.fechaInicio}"/>
+                                    <f:validator validatorId="validatorRangoFechas" />
+                                    <p:message for="ffinal"/>
+                                </p:calendar>
+                                <p:outputLabel value="ESTADO:"/>
+                                <p:selectBooleanCheckbox value="#{cuestionarioBean.encuestatemp.activo}" />
+                            </p:panelGrid>
+                            <p:separator/>
+                            <p:commandButton value="ACTUALIZAR" actionListener="#{cuestionarioBean.actualizarEncuesta}" icon="ui-icon-pencil" oncomplete="PF('aencDialog').hide()" update="pnlgAEnc :frmEnc:tableEncuesta">
+                                <p:growl id="message"/>
+                            </p:commandButton>
+                            <p:commandButton value="CERRAR" process="@this" update="pnlgAEnc" icon="ui-icon-close" oncomplete="PF('aencDialog').hide()" 
+                                             actionListener="#{cuestionarioBean.cerrar()}" >
+                                <p:resetInput target="pnlgAEnc"/>
+                            </p:commandButton> 
+                        </p:outputPanel>
+                    </h:form>
+                </p:dialog>
+                <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+                <!--ACTUALIZACIÓN DE CATEGORÍA -->
+                <p:dialog  id="dlgACat" header="EDITAR LA CATEGORÍA" widgetVar="acatDialog"  modal="true" showEffect="fade" hideEffect="fade" resizable="false" closable="false">
+                    <h:form>
+                        <p:outputPanel id="categoriaDetail" style="text-align:center;">
+                            <p:panelGrid id="pnlgACat" columns="2">
+                                <p:outputLabel value="CATEGORÍA:" for="txtCat"/>
+                                <p:inputText id="txtCat" maxlength="1000"  value="#{cuestionarioBean.categoriatemp.nomCategoria}" 
+                                             required="true" requiredMessage="CATEGORÍA ES UN CAMPO REQUERIDO">
+                                    <p:message for="txtCat"/>
+                                </p:inputText>
+                                <p:outputLabel value="ORDEN:" for="txtOrden1"/>
+                                <p:inputText id="txtOrden1" maxlength="6"  value="#{cuestionarioBean.categoriatemp.orden}" 
+                                             required="true" requiredMessage="EL ORDEN DE LA CATEGORÍA ES REQUERIDO">
+                                    <p:message for="txtOrden1"/>
+                                </p:inputText>
+                            </p:panelGrid>
+                            <p:separator/>
+                            <p:commandButton value="ACTUALIZAR" actionListener="#{cuestionarioBean.actualizarCategoria}" update="pnlgACat :frmTCat:tableCategoria"/>
+                            <p:commandButton value="CERRAR" process="@this" update="pnlgACat" icon="ui-icon-close" oncomplete="PF('acatDialog').hide()" 
+                                             actionListener="#{cuestionarioBean.cerrar()}" >
+                                <p:resetInput target="pnlgACat"/>
+                            </p:commandButton> 
+                        </p:outputPanel>
+                    </h:form>
+                </p:dialog>
+                <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+                <!--ACTUALIZACIÓN DE PREGUNTA -->
+                <p:dialog id="dlgAPre" header="EDITAR LA PREGUNTA" widgetVar="apreDialog"  modal="true" showEffect="fade" hideEffect="fade" resizable="false" closable="false">
+                    <h:form>
+                        <p:outputPanel id="apreDetail" style="text-align:center;">
+                            <p:panelGrid id="pnlgAPre" columns="2">
+                                <p:outputLabel value="PREGUNTA:" for="txtPre"/>
+                                <p:inputText id="txtPre" maxlength="1000" value="#{cuestionarioBean.preguntatemp.texto}" style="width: 900px" 
+                                             required="true" requiredMessage="PREGUNTA ES UN CAMPO REQUERIDO">
+                                    <p:message for="txtPre"/>
+                                </p:inputText>                                           
+                                <p:outputLabel value="ORDEN:" for="txtOrden2"/>
+                                <p:inputText id="txtOrden2" value="#{cuestionarioBean.preguntatemp.orden}"/>
+                                <p:outputLabel value="REQUERIDO"/>
+                                <p:selectBooleanCheckbox value="#{cuestionarioBean.preguntatemp.requerida}"/>
+                                <p:outputLabel value="TIPO PREGUNTA:" for="idTipoPregunta1"/>
+                                <h:panelGroup>
+                                    <p:message for="idTipoPregunta1"/>
+                                    <p:selectOneMenu id="idTipoPregunta1" value="#{cuestionarioBean.idTipoPregunta}"
+                                                     required="true" requiredMessage="TIPO PREGUNTA ES UN CAMPO REQUERIDO">
+                                        <f:selectItem itemLabel="SELECCIONE UNO" itemValue=""/>
+                                        <f:selectItems value="#{cuestionarioBean.itemsTipoPregunta}"/>
+                                    </p:selectOneMenu>
+                                </h:panelGroup>
+                            </p:panelGrid>
+                            <p:separator/>
+                            <p:commandButton value="ACTUALIZAR" actionListener="#{cuestionarioBean.actualizarPregunta}"  update="pnlgAPre :frmTPre:tablePregunta"/>
+                             <p:commandButton value="CERRAR" process="@this" update="pnlgAPre" icon="ui-icon-close" oncomplete="PF('apreDialog').hide()" 
+                                             actionListener="#{cuestionarioBean.cerrar()}" >
+                                <p:resetInput target="pnlgAPre"/>
+                            </p:commandButton> 
+                        </p:outputPanel>
+                    </h:form>
+                </p:dialog>
+                <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+                <!--INGRESO DE RESPUESTA -->
+
+                <p:dialog id="dlgResp" header="INGRESAR RESPUESTA" widgetVar="respDialog" modal="true"
+                          showEffect="fade" resizable="false">
+                    <h:form>
+                        <p:outputPanel style="text-align: center;">
+                            <h:panelGrid id="pnlgRespuesta" columns="2">
+                                <p:outputLabel value="PREGUNTA:"/>
+                                <p:outputLabel value="#{cuestionarioBean.preguntatemp.texto}"/>
+                                <p:outputLabel value="RESPUESTA:" for="txtRes"/>
+                                <p:inputText id="txtRes" maxlength="1000" style="width: 900px" value="#{cuestionarioBean.respuesta.respuestaTexto}" required="true"
+                                             requiredMessage="RESPUESTA ES UN CAMPO REQUERIDO">
+                                    <p:message for="txtRes"/>
+                                </p:inputText>
+                            </h:panelGrid>
+                            <br/>
+                            <p:commandButton value="AGREGAR" actionListener="#{cuestionarioBean.crearRespuesta}" update="pnlgRespuesta :tablaResp:tableRespuesta"/>
+                        </p:outputPanel>
+                    </h:form>
+                    <br/>
+                    <h:form id="tablaResp">
+                        <p:dataTable id="tableRespuesta" value="#{cuestionarioBean.listaRespuestaPregunta()}" var="respuestaItem" paginator="true" rows="5"
+                                     paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                     rowsPerPageTemplate="5,10,15,50">
+                            <p:column headerText="RESPUESTA">
+                                <p:outputLabel value="#{respuestaItem.respuestaTexto}"/>
+                            </p:column>
+                            <p:column headerText="ACCIONES">
+                                <p:commandButton actionListener="#{cuestionarioBean.recuperarRespuestaPorId(respuestaItem.idRespuesta)}" 
+                                                 oncomplete="PF('arespDialog').show()" update=":dlgARes"  icon="ui-icon-pencil" title="EDITAR" />
+                                <p:commandButton  actionListener="#{cuestionarioBean.eliminarRespuesta(respuestaItem)}" title="ELIMINAR" update="tableRespuesta" icon="ui-icon-circle-close" > 
+                                    <p:confirm header="ADVERTENCIA" message="Are you sure?" icon="ui-icon-alert" />
+                                    <p:growl id="message"/>
+                                </p:commandButton>
+                            </p:column>
+                        </p:dataTable>
+                    </h:form>
+                </p:dialog>
+                <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+                <!--EDITAR LA RESPUESTA -->
+                <p:dialog id="dlgARes" header="EDITAR LA RESPUESTA" widgetVar="arespDialog"  modal="true" showEffect="fade" hideEffect="fade" resizable="false">
+                    <h:form>
+                        <p:outputPanel id="arespDetail" style="text-align:center;">
+                            <p:panelGrid id="pnlgAResp" columns="2" rendered="#{not empty cuestionarioBean.respuestatemp}">
+                                <p:outputLabel value="PREGUNTA:"/>
+                                <p:outputLabel value="#{cuestionarioBean.preguntatemp.texto}"/>
+                                <p:outputLabel value="RESPUESTA:" for="txtRes"/>
+                                <p:inputText id="txtRes" maxlength="1000" style="width: 900px" value="#{cuestionarioBean.respuestatemp.respuestaTexto}" required="true"
+                                             requiredMessage="RESPUESTA ES UN CAMPO REQUERIDO">
+                                    <p:message for="txtRes"/>
+                                </p:inputText>
+                            </p:panelGrid>
+                            <p:separator/>
+                            <p:commandButton value="ACTUALIZAR" icon="ui-icon-pencil" actionListener="#{cuestionarioBean.actualizarRespuesta}"  update="pnlgAResp :tablaResp:tableRespuesta"/>
+                            <p:commandButton value="CERRAR" process="@this" update="pnlgAResp" icon="ui-icon-circle-close" oncomplete="PF('arespDialog').hide()" 
+                                             actionListener="#{cuestionarioBean.cerrar()}" >
+                                <p:resetInput target="pnlgAResp"/>
+                            </p:commandButton>
+                        </p:outputPanel>
+                    </h:form>
+                </p:dialog>
+                <!--ELIMINACION PARA TODO -->
+                <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                    <h:form>
+                        <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                        <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+                    </h:form>
+                </p:confirmDialog>
+
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>

@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+        <ui:composition template="./../../WEB-INF/plantillaAdmin.xhtml">
+            <ui:define name="content">
+                <script type="text/javascript">
+                    function start() {
+                        PF('statusDialog').show();
+                    }
+                    function error() {
+                        alert('Error al  general el reporte')
+                    }
+                    var myVar;
+
+                    function loadTime()
+                    {
+                        myVar = setTimeout(function () {
+                            PF('statusDialog').hide()
+                        }, 10000);
+                    }
+                    function resetTime()
+                    {
+                        clearTimeout(myVar);
+                    }
+                </script>
+                <h:form id="frmReport">
+                    <p:tabView dynamic="true" cache="true">
+                        <p:tab title="REPORTE GENERAL">
+                            <h:panelGrid columns="1" cellpadding="100">
+                                <p:chart type="pie" model="#{grafico.pieModel}" style="width: 400px; height: 300px"/> 
+                            </h:panelGrid>
+                        </p:tab>
+                        <p:tab title="REPORTE ENCUESTAS LLENAS">
+                            <h:panelGrid columns="1" cellpadding="100">
+                                <p:chart type="bar" model="#{graficoBarrasEnEsCarreraBean.animatedModel}" style="width:400px;" />
+                            </h:panelGrid>
+                        </p:tab>
+                        <p:tab title="DESCARGAS">
+                            <center>
+                                <p:fieldset  legend="REPORTES">
+                                    <p:panelGrid columns="2">
+                                        <p:outputLabel value="ESCOJA EL REPORTE:" style="font-weight: bold"/>
+                                        <p:selectOneMenu value="#{reporteGeneralBean.opcionReporte}">
+                                            <f:selectItem itemLabel="SELECCIONE UNA OPCIÓN" itemValue="0" />
+                                            <f:selectItem itemLabel="REPORTE GENERAL FACULTAD-CARRERA" itemValue="1" />
+                                            <f:selectItem itemLabel="REPORTE LISTADO GRADUADOS-ENCUESTAS" itemValue="2" />
+                                            <f:selectItem itemLabel="REPORTE NÚMERO DE ENCUESTADOS" itemValue="3"/>
+                                            <f:selectItem itemLabel="REPORTE LISTADO ENCUESTAS POR CARRERA" itemValue="4"/>
+                                            <p:ajax event="change" listener="#{reporteGeneralBean.getCombo}" update="comboFacultad,comboCarrera,idEncuesta"/>
+                                        </p:selectOneMenu>
+                                        <p:outputLabel value="FACULTAD" style="font-weight: bold" />
+                                        <p:selectOneMenu id="comboFacultad" value="#{reporteGeneralBean.idFacultad}"  
+                                                         disabled="#{reporteGeneralBean.estadoComboFacultad}">
+                                            <f:selectItem itemLabel="SELECCIONE UNO" itemValue="" />
+                                            <f:selectItems value="#{reporteGeneralBean.itemsFacultad}"/>
+                                            <p:ajax event="change" listener="#{reporteGeneralBean.getCombo}" update="comboCarrera,idEncuesta"/>
+                                        </p:selectOneMenu>
+                                        <p:outputLabel value="CARRERA:" style="font-weight: bold"/>
+                                        <p:selectOneMenu id="comboCarrera" value="#{reporteGeneralBean.idCarrera}" disabled="#{reporteGeneralBean.estadoComboCarrera}">
+                                            <f:selectItem itemLabel="SELECCIONE UNO" itemValue="#{null}"/>
+                                            <f:selectItems value="#{reporteGeneralBean.itemsCarrera}"/>
+                                            <p:ajax event="change" listener="#{reporteGeneralBean.getCombo}" update="idEncuesta"/>
+                                        </p:selectOneMenu>
+                                        <p:outputLabel value="ENCUESTAS" style="font-weight: bold"/>
+                                        <p:selectOneMenu id="idEncuesta" value="#{reporteGeneralBean.idEncuesta}" disabled="#{reporteGeneralBean.estadoComboEncuesta}">
+                                            <f:selectItem itemLabel="SELLECIONE UNO" itemValue="#{null}" />
+                                            <f:selectItems value="#{reporteGeneralBean.itemsEncuesta}" />
+                                        </p:selectOneMenu>
+                                        <p:outputLabel value="DESCARGAR ARCHIVO: " style="font-weight: bold"/>
+                                        <p:commandLink id="btnReporte"
+                                                       title="DESCARGA PDF"
+                                                       onclick="start();" onerror="error();"
+                                                       ajax="false"
+                                                       actionListener="#{reporteGeneralBean.exportarPDF}" process="@this">
+                                            <h:graphicImage value="/resources/imagen/dow.png" />
+                                        </p:commandLink>
+                                    </p:panelGrid>
+
+                                </p:fieldset>                 
+                            </center>
+                            <p:dialog modal="true" widgetVar="statusDialog"
+                                      onShow="loadTime();" onHide="resetTime();"
+                                      header="ESPERE MIENTRAS SE PROCESA EL REPORTE..."
+                                      draggable="false" closable="false" resizable="false">
+                                <center>
+                                    <h:graphicImage value="/resources/imagen/descarga.gif" />
+                                </center>
+                            </p:dialog>
+                        </p:tab>
+                    </p:tabView>
+                </h:form>
+            </ui:define>
+        </ui:composition>
+    </body>
+</html>

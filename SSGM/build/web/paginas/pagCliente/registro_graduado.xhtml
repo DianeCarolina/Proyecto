@@ -1,0 +1,170 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <body>
+        <ui:composition template="./../../WEB-INF/plantillaCliente.xhtml">
+            <ui:define name="content">
+                <h:form id="idForm">
+                    <p:panel header="SISTEMA DE SEGUIMIENTO A GRADUADOS" style="text-align: center " >
+                        <p style=" line-height: 200%" align="left" >
+                            La encuesta del Programa de Seguimiento a Graduados de la Universidad Central del Ecuador PSG, permite actualizar
+                            datos personales del graduado, perfil laboral y evaluación de la Carrera, a fin de mejorar la formación académica
+                            que oferta la Universidad, establecer un servicio de oferta de trabajo de graduados y desarrollar programas de cuarto 
+                            nivel en base a la demanda. La información proporcionada será tratada con confidencialidad y será usada con finces de
+                            mejoramiento Institucional en acatamiento al artículo 21 de la Ley de Estadística.</p>
+                        <p style="line-height: 200%" align="left">
+                            Agradecemos su tiempo para llenar el formulario .</p>
+
+                        <p:fieldset legend="DATOS PERSONALES DEL GRADUADO" >
+                            <center>
+                                <p:panelGrid columns="6" >
+                                    <p:outputLabel value="NOMBRES:" for="txtname" />
+                                    <p:inputText id="txtname" value="#{personaBean.nuevaPersona.nombres}" disabled="#{personaBean.estadoItemPersonaEncontrada}"
+                                                 style="color:#000000;font-weight:bold;width:190px" onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)"
+                                                 required="true" requiredMessage="NOMBRES ES UN CAMPO REQUERIDO">
+                                        <p:message for="txtname"/>
+                                    </p:inputText>
+                                    <p:outputLabel value="APELLIDOS:" for="txtap"/>
+                                    <p:inputText  id="txtap" value="#{personaBean.nuevaPersona.apellidos}"  disabled="#{personaBean.estadoItemPersonaEncontrada}"
+                                                  style="color:#000000;font-weight:bold;width:190px"
+                                                  onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)" 
+                                                  required="true" requiredMessage="APELLIDOS ES UN CAMPO REQUERIDO">
+                                        <p:message for="txtap"/>
+                                    </p:inputText>
+                                    <p:outputLabel value="Nº DE IDENTIFICACIÓN:" for="cedula" />
+                                    <p:inputText id="cedula" value="#{personaBean.cedulaPersona}"
+                                                 style="color:#000000;font-weight:bold;;width:190px"
+                                                 required="true" requiredMessage="Nº DE IDENTIFICACIÓN ES UN CAMPO REQUERIDO"
+                                                 disabled="#{personaBean.estadoItemPersonaEncontrada}"
+                                                 onkeypress="return soloNumeros(event)">
+                                        <p:message for="cedula"/>
+                                    </p:inputText>
+                                    <p:outputLabel value="DIRECCIÓN:" />
+                                    <p:inputText value="#{personaBean.nuevaPersona.direccion}" 
+                                                 onblur="cambiarMayuscula(this, 'null');" 
+                                                 style="color:#000000;font-weight:bold;width:190px"
+                                                 disabled="#{personaBean.estadoItemPersonaEncontrada}" />                                                             
+                                    <p:outputLabel value="PAÍS:" for="txtpais" />
+                                    <h:panelGroup>
+                                        <p:message for="txtpais"/>
+                                        <p:selectOneMenu id="txtpais" value="#{personaBean.idPais}"  disabled="#{personaBean.estadoItemPersonaEncontrada}"
+                                                         style="width:173px"
+                                                         required="true" requiredMessage="PAÍS ES UN CAMPO REQUERIDO">
+                                            <f:selectItem itemLabel="SELECCIONE UNO" itemValue="" />
+                                            <f:selectItems value="#{personaBean.itemsPais}"/>
+                                            <p:ajax event="change" listener="#{personaBean.getProvincias}" update="idProvincia,idCiudad"></p:ajax>
+                                        </p:selectOneMenu>
+                                    </h:panelGroup>
+                                    <p:outputLabel  value="PROVINCIA:"  for="idProvincia"/>
+                                    <h:panelGroup>
+                                        <p:message for="idProvincia"/>
+                                        <p:selectOneMenu id="idProvincia" value="#{personaBean.idProvincia}" disabled="#{personaBean.estadoProvincias}"
+                                                         style="width:173px"
+                                                         required="true" requiredMessage="PROVINCIA ES UN CAMPO REQUERIDO">
+                                            <f:selectItem itemLabel="SELECCIONE UNO" itemValue="" />
+                                            <f:selectItems value="#{personaBean.itemsProvincia}" />
+                                            <p:ajax event="change" listener="#{personaBean.getCiudades}" update="idCiudad"></p:ajax>
+                                        </p:selectOneMenu>
+                                    </h:panelGroup>
+                                    <p:outputLabel value="CIUDAD:" for="idCiudad" />
+                                    <h:panelGroup>
+                                        <p:message for="idCiudad"/>
+                                        <p:selectOneMenu id="idCiudad" value="#{personaBean.idCiudad}" disabled="#{personaBean.estadoCiudades}"
+                                                         style="width:173px"
+                                                         required="true" requiredMessage="CIUDAD ES UN CAMPO REQUERIDO">
+                                            <f:selectItem itemLabel="SELECCIONE UNO" itemValue="" />
+                                            <f:selectItems value="#{personaBean.itemsCiudad}" />
+                                        </p:selectOneMenu>
+                                    </h:panelGroup>
+                                    <p:outputLabel  value="FECHA DE NACIMIENTO:" />
+                                    <p:calendar showOn="button" id="idFechaNac" value="#{personaBean.nuevaPersona.fechaNacimiento}" 
+                                                locale="de" navigator="true" yearRange="1900:2100" pattern="dd-MM-yyyy"  
+                                                disabled="#{personaBean.estadoItemPersonaEncontrada}" size="24"
+                                                style="color:#000000;font-weight:bold;"
+                                                required="true" requiredMessage="FECHA DE NACIMIENTO ES UN CAMPO REQUERIDO">
+                                    </p:calendar>                              
+                                    <p:outputLabel value="LUGAR DE NACIMIENTO:" />
+                                    <p:inputText value="#{personaBean.nuevaPersona.lugarNacimiento}" 
+                                                 style="color:#000000;font-weight:bold;width:190px"
+                                                 onblur="cambiarMayuscula(this, 'null');" 
+                                                 disabled="#{personaBean.estadoItemPersonaEncontrada}"/>
+                                    <p:outputLabel value="TELÉFONO FIJO:" for="txttelefono"/>
+                                    <p:inputMask id="txttelefono" mask="(99) 9999-999" value="#{personaBean.nuevaPersona.telefFijo}" 
+                                                 style="color:#000000;font-weight:bold;width:190px"
+                                                 disabled="#{personaBean.estadoItemPersonaEncontrada}"/>
+                                    <p:outputLabel value="TELÉFONO MÓVIL:" for="txtmovil" />
+                                    <p:inputMask id="txtmovil" mask="(99) 9999-9999" value="#{personaBean.nuevaPersona.telefMovil}" 
+                                                 style="color:#000000;font-weight:bold;width:190px"
+                                                 disabled="#{personaBean.estadoItemPersonaEncontrada}"/>
+                                    <p:outputLabel value="CORREO:" for="txtemail" />
+                                    <p:inputText id="txtemail" value="#{personaBean.nuevaPersona.correo}"  
+                                                 style="color:#000000;font-weight:bold;width:190px"
+                                                 size="50" title="EJMEPLO: kaaf030191@gmail.com"
+                                                 disabled="#{personaBean.estadoItemPersonaEncontrada}">
+                                        <f:validator validatorId="validatorEmail"/>
+                                        <h:panelGroup>
+                                            <p:tooltip for="txtemail" showEvent="focus" hideEvent="blur"/>
+                                            <p:message for="txtemail"/>
+                                        </h:panelGroup>
+                                    </p:inputText>
+                                    <p:outputLabel value="SEXO:" for="genero"/>
+                                    <h:panelGroup>
+                                        <p:message for="genero"/>
+                                        <p:selectOneMenu id="genero" value="#{personaBean.nuevaPersona.genero}" effect="fold" disabled="#{personaBean.estadoItemPersonaEncontrada}"
+                                                         style="width:173px"
+                                                         required="true" requiredMessage="GÉNERO ES UN CAMPO REQUERIDO">
+                                            <f:selectItem itemLabel="SELECIONE UNO" itemValue=""/>
+                                            <f:selectItems value="#{personaBean.genero}"/>
+                                        </p:selectOneMenu>
+                                    </h:panelGroup>
+                                    <p:outputLabel value="EDAD:" />
+                                    <p:outputLabel value="#{personaBean.nuevaPersona.edad}"/>
+                                    <p:outputLabel value="ESTADO CIVIL:" for="estado"/>
+                                    <h:panelGroup>
+                                        <p:message for="estado"/>
+                                        <p:selectOneMenu id="estado" value="#{personaBean.idEstadoCivil}" disabled="#{personaBean.estadoItemPersonaEncontrada}"
+                                                         style="width:173px"
+                                                         required="true" requiredMessage="ESTADO CIVIL ES UN CAMPO REQUERIDO">
+                                            <f:selectItem itemLabel="SELECCIONE UNO" itemValue=" " />
+                                            <f:selectItems value="#{personaBean.itemsEstadoCivil}" />
+                                        </p:selectOneMenu>
+                                    </h:panelGroup>
+                                    <p:outputLabel value="NACIONALIDAD:"/>
+                                    <p:inputText value="#{personaBean.nuevaPersona.nacionalidad}"  
+                                                 style="color:#000000;font-weight:bold;width:190px"
+                                                 onblur="cambiarMayuscula(this, 'null');" onkeypress="return soloLetras(event)"
+                                                 disabled="#{personaBean.estadoItemPersonaEncontrada}"/>
+                                    <p:outputLabel value="CARRERA:" for="carrera" />
+                                    <h:panelGroup>
+                                        <p:message for="carrera"/>
+                                        <p:selectOneMenu id="carrera" value="#{personaBean.idCarrera}"  disabled="#{personaBean.estadoItemPersonaEncontrada}"
+                                                         style="width:173px"
+                                                         required="true" requiredMessage="CARRERA ES UN CAMPO REQUERIDO">
+                                            <f:selectItem itemLabel="SELECCIONE UNO" itemValue=" " />
+                                            <f:selectItems value="#{personaBean.itemsCarrera}" />
+                                        </p:selectOneMenu>
+                                    </h:panelGroup>
+                                </p:panelGrid>
+                            </center>
+                        </p:fieldset>
+                        <h:panelGrid columns="3">
+                            <p:commandButton value="GUARDAR"  update="idForm" disabled="#{personaBean.estadoBtnGuardar}" ajax="false"
+                                             actionListener="#{personaBean.ingresoNuevaPersona}"/>
+                            <p:outputLabel value="ESTUDIANTE HABILITADO PARA LLENAR ENCUESTA: " rendered="#{personaBean.estadoTextoEstHabilitado}" style="color: #F90A0A"/>
+                            <p:commandButton value="LLENAR FORMULARIO" update="idForm" disabled="#{personaBean.estadoBtnFormulario}" 
+                                             action="/paginas/cuestionario/vista1.jsf">
+                                <f:param name="idEstudiantEncuesta" value="#{personaBean.nuevaPersonaAux.numeroIdentificacion}" />
+                            </p:commandButton>
+                        </h:panelGrid>
+                    </p:panel >
+                </h:form>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>

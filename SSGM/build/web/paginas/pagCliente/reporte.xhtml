@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+
+    <body>
+
+        <ui:composition template="./../../WEB-INF/plantillaCliente.xhtml">
+
+            <ui:define name="content">
+                <script type="text/javascript">
+                    function start() {
+                        PF('statusDialog').show();
+                    }
+                    function error() {
+                        alert('Error al  general el reporte')
+                    }
+                    var myVar;
+
+                    function loadTime()
+                    {
+                        myVar = setTimeout(function () {
+                            PF('statusDialog').hide()
+                        }, 10000);
+                    }
+                    function resetTime()
+                    {
+                        clearTimeout(myVar);
+                    }
+                </script>
+                <h:form id="formEstadisticas" prependId="false">
+                    <p:fieldset  legend="REPORTE ENCUESTA">
+                        <center>
+                            <h:panelGrid columns="3">
+                                <p:outputLabel value="CÉDULA:" />
+                                <p:inputText maxlength="10" value="#{rEncuesta.cedula}"/>
+                                <p:commandLink   id="btnReporte" 
+                                                 title="DESCARGA PDF"  
+                                                 onclick="start();" onerror="error();"
+                                                 ajax="false" 
+                                                 actionListener="#{rEncuesta.validarPersona}">
+                                    <h:graphicImage value="/resources/imagen/dow.png" />
+                                </p:commandLink>
+
+                            </h:panelGrid>
+                        </center>
+                    </p:fieldset>
+
+                    <p:dialog modal="true" widgetVar="statusDialog"
+                              onShow="loadTime();" onHide="resetTime();"
+                              header="ESPERE MIENTRAS SE PROCESA EL REPORTE..."
+                              draggable="false" closable="false" resizable="false">
+                        <center>
+                            <h:graphicImage value="/resources/imagen/descarga.gif" />
+                        </center>
+                    </p:dialog>
+                </h:form>
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>
